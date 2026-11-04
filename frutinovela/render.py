@@ -14,7 +14,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-W, H, FPS, DUR = 1080, 1920, 30, 10.0
+W, H, FPS, DUR = 1080, 1920, 30, 10.0   # DUR se recalcula según las voces
 NF = int(FPS * DUR)
 SR = 44100
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
@@ -253,7 +253,7 @@ GOLD = ((60, 10, 0), (230, 120, 20))
 PURP = ((25, 0, 50), (140, 30, 160))
 
 def frame(i):
-    t = i / FPS
+    t = a_original(i / FPS)
     if t < 1.5:            # 1. Fresa descubre la traición
         img = gradient(*PURP)
         for k in range(40):  # lluvia dramática
@@ -476,12 +476,44 @@ GUION = [(0.08, 1.40, "fresa",    "¡¿Me engañaste con la piña?!"),
          (7.13, 1.00, "fresa",    "¡Sí, mi platanito!"),
          (8.78, 0.65, "narrador", "Continuará.")]
 
+# ------------------------------------------------------------ línea de tiempo
+# La animación está diseñada en 10 s. Cada línea del GUION ocupa un tramo; si la voz
+# real (p. ej. de ElevenLabs) dura más que su tramo, el tramo se alarga lo justo para
+# que la frase suene natural (acelerándola como máximo un 10 %), sin pausas muertas.
+TRAMOS = [0, 1.5, 2.9, 3.35, 4.6, 5.0, 5.4, 5.8, 7.1, 8.7, 10.0]
+COLA = [0.15, 0.15, 0.1, 0.5, 0.15, 0.15, 0.2, 0.25, 0.4, 0.9]   # respiro tras cada frase
+MAX_ACELERA = 1.1
+NUEVOS = list(TRAMOS)
+VOCES = {}
+
+def preparar_linea_de_tiempo():
+    global NUEVOS, DUR, NF
+    NUEVOS = [0.0]
+    for k, (st, md, quien, txt) in enumerate(GUION):
+        y = voz(quien, txt, 99, k + 1)
+        lead = st - TRAMOS[k]
+        largo_orig = TRAMOS[k + 1] - TRAMOS[k]
+        largo = max(largo_orig, len(y) / SR / MAX_ACELERA + lead + COLA[k])
+        hueco = max(md, largo - lead - COLA[k])
+        if len(y) / SR > hueco:
+            y = voz(quien, txt, hueco, k + 1)
+        VOCES[k] = y
+        NUEVOS.append(NUEVOS[-1] + largo)
+    DUR = NUEVOS[-1]
+    NF = int(round(FPS * DUR))
+
+def a_original(tn):
+    """Tiempo del video final -> tiempo de la animación original (10 s)."""
+    return float(np.interp(tn, NUEVOS, TRAMOS))
+
+def a_nuevo(to):
+    return float(np.interp(to, TRAMOS, NUEVOS))
+
 # ----------------------------------------------------------------- audio
 def build_audio(path):
     n = int(SR * DUR); out = np.zeros(n)
-    tt = np.arange(n) / SR
     def add(sig, at, gain=1.0):
-        s = int(at * SR); e = min(n, s + len(sig)); out[s:e] += sig[:e - s] * gain
+        s = int(a_nuevo(at) * SR); e = min(n, s + len(sig)); out[s:e] += sig[:e - s] * gain
     def tone(freqs, dur, attack=0.005, decay=3.0, kind="saw"):
         x = np.arange(int(SR * dur)) / SR; y = np.zeros_like(x)
         for f in freqs:
@@ -501,8 +533,8 @@ def build_audio(path):
     pad_chords = [(0, [50, 53, 57]), (1.5, [48, 52, 55]), (2.9, [49, 52, 56]), (4.6, [47, 50, 53]),
                   (5.8, [53, 57, 60]), (7.1, [55, 59, 62]), (8.7, [50, 53, 56])]
     for j, (st, ch) in enumerate(pad_chords):
-        en = pad_chords[j + 1][0] if j + 1 < len(pad_chords) else DUR
-        seg = tone([hz(m) for m in ch], en - st, attack=0.05, decay=0.2)
+        en = pad_chords[j + 1][0] if j + 1 < len(pad_chords) else TRAMOS[-1]
+        seg = tone([hz(m) for m in ch], a_nuevo(en) - a_nuevo(st), attack=0.05, decay=0.2)
         x = np.arange(len(seg)) / SR
         add(seg * (0.6 + 0.4 * np.sin(2 * np.pi * 12 * x)), st, 0.18)
     # golpes dramáticos
@@ -530,13 +562,13 @@ def build_audio(path):
     # voces encima, con la música bajando cuando alguien habla
     music = out / (np.max(np.abs(out)) + 1e-9)
     vox = np.zeros(n)
-    for idx, (st, md, quien, txt) in enumerate(GUION, 1):
-        y = voz(quien, txt, md, idx)
+    for k, (st, md, quien, txt) in enumerate(GUION):
+        y = VOCES[k]
         if quien == "pina" and "madre" in txt:   # eco de revelación
             y = np.concatenate([y, np.zeros(int(SR * 0.6))])
-            for k, g in ((0.15, 0.45), (0.3, 0.25), (0.45, 0.12)):
-                d_ = int(SR * k); y[d_:] += y[:-d_] * g
-        s0 = int(st * SR); e0 = min(n, s0 + len(y)); vox[s0:e0] += y[:e0 - s0]
+            for retardo, g in ((0.15, 0.45), (0.3, 0.25), (0.45, 0.12)):
+                d_ = int(SR * retardo); y[d_:] += y[:-d_] * g
+        s0 = int((NUEVOS[k] + st - TRAMOS[k]) * SR); e0 = min(n, s0 + len(y)); vox[s0:e0] += y[:e0 - s0]
     act = np.convolve((np.abs(vox) > 0.02).astype(float), np.ones(int(SR * 0.08)) / int(SR * 0.08), mode="same")
     out = music * (1 - 0.6 * np.clip(act * 3, 0, 1)) * 0.75 + vox * 0.95
     out[-int(SR * 0.08):] *= np.linspace(1, 0, int(SR * 0.08))
@@ -548,6 +580,8 @@ def build_audio(path):
 def main():
     wav = os.path.join(HERE, "_audio.wav")
     mp4 = os.path.join(HERE, "frutinovela_amor.mp4")
+    preparar_linea_de_tiempo()
+    print(f"duración: {DUR:.1f} s")
     build_audio(wav)
     ff = subprocess.Popen(["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24",
                            "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-", "-i", wav,
@@ -563,6 +597,7 @@ def main():
 if __name__ == "__main__":
     import sys
     if len(sys.argv) > 1:  # previsualizar fotogramas: python3 render.py 0.5 3.5 ...
+        preparar_linea_de_tiempo()
         for s in sys.argv[1:]:
             frame(int(float(s) * FPS)).save(os.path.join(HERE, f"_preview_{s}.png"))
     else:

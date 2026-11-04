@@ -2,6 +2,10 @@
 
 `python3 render.py` crea `frutinovela_amor.mp4` (1080x1920, 30 fps).
 
+La carpeta `voces/` ya trae las 10 voces de ElevenLabs (Betty, Ezequiel, Yadira y Josué Maya).
+El video se alarga solo para que cada frase quepa con su ritmo natural: con estas voces
+dura unos 19 s; con las voces sintéticas de respaldo, 10 s.
+
 ## Voces con ElevenLabs
 
 **Opción A, automática (API):**
@@ -17,7 +21,7 @@ o `ELEVENLABS_VOZ_NARRADOR` con el *voice ID* que quieras. Para cambiar el model
 
 **Opción B, manual (desde elevenlabs.io):** genera cada línea en la web, descárgala con
 este nombre en la carpeta `voces/` y ejecuta `python3 render.py`. Si una línea dura de más,
-se acelera sola sin cambiar el tono.
+la escena se alarga para que quepa (y la voz se acelera como máximo un 10 %, sin cambiar el tono).
 
 | Archivo | Personaje | Línea | Máx. |
 |---|---|---|---|
