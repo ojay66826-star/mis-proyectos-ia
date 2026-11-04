@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mis Tareas</title>
+  <style>
+    :root { --fondo:#f5f6fa; --texto:#1d1f2c; --suave:#6b6f85; --acento:#5b5bd6; --tarjeta:#fff; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, sans-serif; background:var(--fondo); color:var(--texto); }
+    main { max-width: 480px; margin: 40px auto; padding: 0 16px; }
+    h1 { margin-bottom: 4px; }
+    #resumen { color: var(--suave); margin-top: 0; }
+    form { display:flex; gap:8px; margin: 20px 0; }
+    input[type=text] { flex:1; padding:12px; border-radius:10px; border:1px solid #d5d7e3; font:inherit; }
+    button { border:0; border-radius:10px; padding:0 16px; font:inherit; cursor:pointer; }
+    form button { background:var(--acento); color:#fff; font-weight:600; }
+    .filtros { display:flex; gap:8px; margin-bottom:12px; }
+    .filtros button { background:transparent; color:var(--suave); padding:6px 12px; }
+    .filtros button.activo { background:var(--tarjeta); color:var(--texto); box-shadow:0 1px 3px #0002; }
+    ul { list-style:none; padding:0; margin:0; display:grid; gap:8px; }
+    li { display:flex; align-items:center; gap:12px; background:var(--tarjeta); padding:12px; border-radius:12px; box-shadow:0 1px 3px #0001; }
+    li span { flex:1; }
+    li.hecha span { text-decoration: line-through; color: var(--suave); }
+    li .borrar { background:transparent; color:#c0392b; font-size:1.1rem; padding:4px 8px; }
+    .vacio { text-align:center; color:var(--suave); padding:24px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>✅ Mis Tareas</h1>
+    <p id="resumen"></p>
+
+    <form id="nueva">
+      <input type="text" id="texto" placeholder="¿Qué tienes que hacer?" required>
+      <button type="submit">Añadir</button>
+    </form>
+
+    <div class="filtros">
+      <button data-filtro="todas" class="activo">Todas</button>
+      <button data-filtro="pendientes">Pendientes</button>
+      <button data-filtro="hechas">Hechas</button>
+    </div>
+
+    <ul id="lista"></ul>
+  </main>
+
+  <script>
+    // Las tareas se guardan en el navegador, así no se pierden al recargar.
+    const CLAVE = "mis-tareas";
+    let tareas = cargar();
+    let filtro = "todas";
+
+    function cargar() {
+      try { return JSON.parse(localStorage.getItem(CLAVE)) || []; } catch { return []; }
+    }
+    function guardar() {
+      try { localStorage.setItem(CLAVE, JSON.stringify(tareas)); } catch {}
+    }
+
+    function dibujar() {
+      const lista = document.getElementById("lista");
+      const visibles = tareas.filter(t =>
+        filtro === "todas" || (filtro === "hechas" ? t.hecha : !t.hecha));
+      lista.innerHTML = "";
+      if (visibles.length === 0) {
+        lista.innerHTML = '<li class="vacio">No hay tareas aquí 🎉</li>';
+      }
+      for (const tarea of visibles) {
+        const li = document.createElement("li");
+        li.className = tarea.hecha ? "hecha" : "";
+        li.innerHTML = `<input type="checkbox" ${tarea.hecha ? "checked" : ""}>
+                        <span></span><button class="borrar" title="Borrar">✕</button>`;
+        li.querySelector("span").textContent = tarea.texto;
+        li.querySelector("input").onchange = () => { tarea.hecha = !tarea.hecha; guardar(); dibujar(); };
+        li.querySelector(".borrar").onclick = () => { tareas = tareas.filter(t => t !== tarea); guardar(); dibujar(); };
+        lista.appendChild(li);
+      }
+      const pendientes = tareas.filter(t => !t.hecha).length;
+      document.getElementById("resumen").textContent =
+        `${pendientes} pendiente${pendientes === 1 ? "" : "s"} de ${tareas.length}`;
+    }
+
+    document.getElementById("nueva").onsubmit = (e) => {
+      e.preventDefault();
+      const campo = document.getElementById("texto");
+      tareas.push({ texto: campo.value.trim(), hecha: false });
+      campo.value = "";
+      guardar(); dibujar();
+    };
+
+    document.querySelectorAll(".filtros button").forEach(boton => {
+      boton.onclick = () => {
+        filtro = boton.dataset.filtro;
+        document.querySelectorAll(".filtros button").forEach(b => b.classList.toggle("activo", b === boton));
+        dibujar();
+      };
+    });
+
+    dibujar();
+  </script>
+</body>
+</html>

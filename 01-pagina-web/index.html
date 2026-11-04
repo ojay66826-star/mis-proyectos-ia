@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Estudio Aurora</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <header class="barra">
+    <span class="logo">✦ Aurora</span>
+    <nav>
+      <a href="#servicios">Servicios</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="portada">
+      <h1>Ideas que cobran vida</h1>
+      <p>Diseño, web y contenido creativo con ayuda de la inteligencia artificial.</p>
+      <a class="boton" href="#contacto">Empecemos</a>
+    </section>
+
+    <section id="servicios" class="tarjetas">
+      <article><h2>🌐 Páginas web</h2><p>Sitios rápidos y bonitos que se ven bien en el móvil.</p></article>
+      <article><h2>🎨 Imágenes</h2><p>Ilustraciones y gráficos generados a medida.</p></article>
+      <article><h2>🎬 Video</h2><p>Animaciones cortas para redes sociales.</p></article>
+    </section>
+
+    <section id="contacto" class="contacto">
+      <h2>Escríbenos</h2>
+      <form id="formulario">
+        <input name="nombre" placeholder="Tu nombre" required>
+        <input name="correo" type="email" placeholder="Tu correo" required>
+        <textarea name="mensaje" placeholder="¿En qué te ayudamos?" required></textarea>
+        <button type="submit" class="boton">Enviar</button>
+        <p id="aviso" role="status"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer>Hecho con ✦ y IA · <span id="anio"></span></footer>
+  <script src="script.js"></script>
+</body>
+</html>
