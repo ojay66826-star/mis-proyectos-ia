@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Animación interactiva</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:radial-gradient(circle at 50% 40%,#fff6d8,#ffd3a8);font-family:system-ui,sans-serif;cursor:pointer}
+  canvas{display:block}
+  #tip{position:absolute;top:14px;width:100%;text-align:center;color:#6b3d1f;font-weight:700}
+</style></head>
+<body><div id="tip">Mueve el ratón: el personaje te mira · Haz clic: salta · Tecla espacio: baila</div><canvas id="c"></canvas>
+<script>
+// Animación interactiva con Canvas 2D + física sencilla (gravedad y squash & stretch)
+const c = document.getElementById("c"), g = c.getContext("2d");
+const q = new URLSearchParams(location.search);
+const color = q.get("color") || "#fb8c00";
+let W, H; const resize = () => { W = c.width = innerWidth; H = c.height = innerHeight; }; resize(); addEventListener("resize", resize);
+const st = { y: 0, vy: 0, sq: 1, mx: 0.5, my: 0.5, dance: false, parts: [] };
+addEventListener("mousemove", (e) => { st.mx = e.clientX / W; st.my = e.clientY / H; });
+addEventListener("click", () => { if (st.y === 0) { st.vy = 900; st.sq = 1.3; burst(); } });
+addEventListener("keydown", (e) => { if (e.code === "Space") st.dance = !st.dance; });
+function burst() { for (let i = 0; i < 30; i++) st.parts.push({ x: W / 2, y: H * 0.72, vx: (Math.random() - .5) * 500, vy: -Math.random() * 500, life: 1 }); }
+function draw(t, dt) {
+  st.vy -= 2400 * dt; st.y = Math.max(0, st.y + st.vy * dt);
+  if (st.y === 0 && st.vy < 0) { if (st.vy < -300) st.sq = 1.25; st.vy = 0; }
+  st.sq += (1 - st.sq) * Math.min(1, dt * 10);
+  g.clearRect(0, 0, W, H);
+  const R = Math.min(W, H) * 0.16, cx = W / 2, base = H * 0.72;
+  const danceT = st.dance ? Math.sin(t * 8) : 0;
+  const cy = base - R - st.y - Math.abs(danceT) * 20;
+  const sx = st.sq, sy = 1 / st.sq;
+  g.fillStyle = "rgba(0,0,0,.15)"; g.beginPath(); g.ellipse(cx, base, R * (1 - st.y / 900), R * 0.15, 0, 0, 7); g.fill();
+  g.save(); g.translate(cx, cy + R); g.rotate(danceT * 0.15); g.scale(sx, sy); g.translate(0, -R);
+  g.lineWidth = R * 0.07; g.strokeStyle = "#1e161c";
+  for (const s of [-1, 1]) { g.beginPath(); g.moveTo(s * R * 0.9, 0); g.lineTo(s * R * 1.5, (st.dance ? -1 : 0.6) * R * (s * danceT > 0 ? 1.2 : 0.6)); g.stroke(); }
+  for (const s of [-1, 1]) { g.beginPath(); g.moveTo(s * R * 0.35, R * 0.85); g.lineTo(s * R * 0.4, R * 1.3); g.stroke(); }
+  g.fillStyle = color; g.beginPath(); g.arc(0, 0, R, 0, 7); g.fill(); g.stroke();
+  const blink = (t % 3.2) < 0.12 ? 0.1 : 1;
+  for (const s of [-1, 1]) {
+    const ex = s * R * 0.38, ey = -R * 0.12;
+    g.fillStyle = "#fff"; g.beginPath(); g.ellipse(ex, ey, R * 0.2, R * 0.26 * blink, 0, 0, 7); g.fill(); g.lineWidth = R * 0.03; g.stroke();
+    const lx = (st.mx - 0.5) * R * 0.18, ly = (st.my - 0.4) * R * 0.18;
+    g.fillStyle = "#1e161c"; g.beginPath(); g.ellipse(ex + lx, ey + ly, R * 0.1, R * 0.12 * blink, 0, 0, 7); g.fill();
+  }
+  g.fillStyle = "#8a1c2f"; g.beginPath(); g.ellipse(0, R * 0.4, R * 0.18, R * (st.y > 0 ? 0.16 : 0.07), 0, 0, Math.PI); g.fill();
+  g.restore();
+  for (const p of st.parts) { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 900 * dt; p.life -= dt; g.fillStyle = `rgba(255,190,11,${Math.max(0, p.life)})`; g.fillRect(p.x, p.y, 8, 8); }
+  st.parts = st.parts.filter((p) => p.life > 0);
+}
+let last = performance.now() / 1000, start = last;
+function loop() { const now = performance.now() / 1000; draw(now - start, Math.min(0.05, now - last)); last = now; requestAnimationFrame(loop); }
+// modo captura determinista: simula clics automáticos cada 1.5 s
+window.__duration = 4;
+let simT = 0;
+window.__seek = (t) => { const dt = t - simT; if (dt <= 0) return; if (Math.floor(t / 1.5) !== Math.floor(simT / 1.5)) { st.vy = 900; st.sq = 1.3; burst(); }
+  st.mx = 0.5 + 0.4 * Math.sin(t); simT = t; draw(t, dt); };
+window.__ready = true;
+if (!q.has("capture")) loop();
+</script></body></html>

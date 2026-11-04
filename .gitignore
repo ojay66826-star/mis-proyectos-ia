@@ -1,0 +1,23 @@
+# Secretos (NUNCA subir)
+.env
+.env.*
+!.env.example
+
+# Resultados generados
+projects/*
+!projects/.gitkeep
+tests/resultados/
+remotion/public/proyecto/
+remotion/out/
+
+# Dependencias
+node_modules/
+remotion/node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Sistema
+.DS_Store
+*.log

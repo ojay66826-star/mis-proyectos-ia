@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Personaje SVG + CSS</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(#7fd3ff,#d6f3ff 70%,#8bc34a 70%)}
+  svg{position:absolute;left:50%;top:52%;width:46vmin;transform:translate(-50%,-50%);overflow:visible}
+  /* Animaciones CSS: rebote con squash & stretch, parpadeo y brazos */
+  .body{transform-origin:100px 190px;animation:bounce 0.8s ease-in-out infinite}
+  @keyframes bounce{0%,100%{transform:translateY(0) scale(1.06,0.94)}50%{transform:translateY(-38px) scale(0.95,1.06)}}
+  .eye{transform-box:fill-box;transform-origin:center;animation:blink 3s steps(1) infinite}
+  @keyframes blink{0%,94%{transform:scaleY(1)}95%,99%{transform:scaleY(0.1)}}
+  .armL{transform-origin:40px 110px;animation:wave 0.4s ease-in-out infinite alternate}
+  .armR{transform-origin:160px 110px;animation:wave2 0.8s ease-in-out infinite alternate}
+  @keyframes wave{from{transform:rotate(-20deg)}to{transform:rotate(-70deg)}}
+  @keyframes wave2{from{transform:rotate(10deg)}to{transform:rotate(30deg)}}
+  .shadow{transform-origin:100px 205px;animation:shadow 0.8s ease-in-out infinite}
+  @keyframes shadow{0%,100%{transform:scaleX(1);opacity:.35}50%{transform:scaleX(.6);opacity:.15}}
+  .cloud{animation:drift 8s linear infinite}
+  @keyframes drift{from{transform:translateX(-30vw)}to{transform:translateX(110vw)}}
+</style></head>
+<body>
+<svg class="cloud" style="top:12%;left:0;width:20vmin;transform:none" viewBox="0 0 100 50"><g fill="#fff"><circle cx="30" cy="30" r="18"/><circle cx="55" cy="22" r="22"/><circle cx="78" cy="32" r="15"/></g></svg>
+<svg viewBox="0 0 200 220">
+  <ellipse class="shadow" cx="100" cy="205" rx="55" ry="9" fill="#000"/>
+  <g class="body">
+    <g class="armL"><path d="M40 110 Q10 120 8 150" stroke="#1e161c" stroke-width="7" fill="none" stroke-linecap="round"/><circle cx="8" cy="152" r="10" fill="#fff" stroke="#1e161c" stroke-width="4"/></g>
+    <g class="armR"><path d="M160 110 Q190 120 192 150" stroke="#1e161c" stroke-width="7" fill="none" stroke-linecap="round"/><circle cx="192" cy="152" r="10" fill="#fff" stroke="#1e161c" stroke-width="4"/></g>
+    <path d="M70 175 L65 198 M130 175 L135 198" stroke="#1e161c" stroke-width="8" stroke-linecap="round"/>
+    <ellipse cx="62" cy="200" rx="14" ry="7" fill="#78482f"/><ellipse cx="138" cy="200" rx="14" ry="7" fill="#78482f"/>
+    <path id="fruit" d="M100 50 C60 30 25 60 30 110 C35 160 70 185 100 180 C130 185 165 160 170 110 C175 60 140 30 100 50Z" fill="var(--c,#e53935)" stroke="#1e161c" stroke-width="6"/>
+    <path d="M100 50 Q104 30 110 22" stroke="#795548" stroke-width="6" fill="none"/><ellipse cx="122" cy="26" rx="14" ry="7" fill="#4caf50"/>
+    <ellipse cx="62" cy="80" rx="10" ry="6" fill="#fff" opacity=".5"/>
+    <g class="eye"><ellipse cx="78" cy="100" rx="14" ry="18" fill="#fff" stroke="#1e161c" stroke-width="3"/><circle cx="80" cy="104" r="8" fill="#1e161c"/><circle cx="77" cy="100" r="3" fill="#fff"/></g>
+    <g class="eye"><ellipse cx="122" cy="100" rx="14" ry="18" fill="#fff" stroke="#1e161c" stroke-width="3"/><circle cx="124" cy="104" r="8" fill="#1e161c"/><circle cx="121" cy="100" r="3" fill="#fff"/></g>
+    <path d="M80 135 Q100 155 120 135" stroke="#1e161c" stroke-width="5" fill="#8a1c2f" stroke-linejoin="round"/>
+    <ellipse cx="62" cy="128" rx="9" ry="5" fill="#ff8aa5" opacity=".7"/><ellipse cx="138" cy="128" rx="9" ry="5" fill="#ff8aa5" opacity=".7"/>
+  </g>
+</svg>
+<script>
+  const q = new URLSearchParams(location.search);
+  if (q.get("color")) document.documentElement.style.setProperty("--c", q.get("color"));
+  window.__duration = Number(q.get("duration") || 4);
+  // Control determinista de TODAS las animaciones CSS mediante la Web Animations API
+  window.__seek = (t) => { for (const a of document.getAnimations()) { a.pause(); a.currentTime = t * 1000; } };
+  window.__ready = true;
+</script>
+</body></html>
