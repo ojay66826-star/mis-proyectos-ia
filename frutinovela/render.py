@@ -409,8 +409,9 @@ def _cargar_audio(path, max_dur):
     """Decodifica con ffmpeg a mono 44.1 kHz y acelera (sin cambiar el tono) si no cabe."""
     def dec(filtros):
         cmd = ["ffmpeg", "-v", "error", "-i", path, "-ac", "1", "-ar", str(SR)]
-        if filtros:
-            cmd += ["-af", filtros]
+        # acorta las pausas largas dentro de la frase
+        base = "silenceremove=start_periods=1:start_threshold=-40dB:stop_periods=-1:stop_threshold=-40dB:stop_duration=0.12:stop_silence=0.06"
+        cmd += ["-af", base + ("," + filtros if filtros else "")]
         raw = subprocess.run(cmd + ["-f", "f32le", "-"], capture_output=True, check=True).stdout
         y = np.frombuffer(raw, np.float32).astype(np.float64)
         nz = np.nonzero(np.abs(y) > 0.01 * (np.max(np.abs(y)) + 1e-9))[0]
@@ -422,7 +423,7 @@ def _cargar_audio(path, max_dur):
         while f > 2:
             tempos.append("atempo=2.0"); f /= 2
         tempos.append(f"atempo={f * 1.02:.4f}")
-        y = dec(",".join(["silenceremove=start_periods=1:start_threshold=-40dB"] + tempos))
+        y = dec(",".join(tempos))
     return y[:int(max_dur * SR)]
 
 def voz(quien, text, max_dur, idx=None):
@@ -478,29 +479,40 @@ GUION = [(0.08, 1.40, "fresa",    "¡¿Me engañaste con la piña?!"),
 
 # ------------------------------------------------------------ línea de tiempo
 # La animación está diseñada en 10 s. Cada línea del GUION ocupa un tramo; si la voz
-# real (p. ej. de ElevenLabs) dura más que su tramo, el tramo se alarga lo justo para
-# que la frase suene natural (acelerándola como máximo un 10 %), sin pausas muertas.
+# real (p. ej. de ElevenLabs) dura más que su tramo, el tramo se alarga; todas las voces
+# se aceleran por igual (sin cambiar el tono) para que el corto dure OBJETIVO segundos.
 TRAMOS = [0, 1.5, 2.9, 3.35, 4.6, 5.0, 5.4, 5.8, 7.1, 8.7, 10.0]
-COLA = [0.15, 0.15, 0.1, 0.5, 0.15, 0.15, 0.2, 0.25, 0.4, 0.9]   # respiro tras cada frase
-MAX_ACELERA = 1.1
+COLA = [0.06, 0.06, 0.04, 0.3, 0.05, 0.05, 0.08, 0.08, 0.15, 0.7]   # respiro tras cada frase
+OBJETIVO = float(os.environ.get("FRUTINOVELA_DURACION", "12"))     # duración buscada (s)
 NUEVOS = list(TRAMOS)
 VOCES = {}
 
+def _largos(dur_voz, f):
+    res = []
+    for k, (st, md, quien, txt) in enumerate(GUION):
+        lead = st - TRAMOS[k]
+        res.append(max(0.7 * (TRAMOS[k + 1] - TRAMOS[k]), dur_voz[k] / f + lead + COLA[k]))
+    return res
+
 def preparar_linea_de_tiempo():
+    """Ajusta cada tramo a su voz y acelera todas las voces por igual hasta llegar a OBJETIVO."""
     global NUEVOS, DUR, NF
+    dur_voz = [len(voz(q, t, 99, k + 1)) / SR for k, (_, _, q, t) in enumerate(GUION)]
+    lo, hi = 1.0, 3.0
+    if sum(_largos(dur_voz, lo)) > OBJETIVO:
+        for _ in range(40):
+            mid = (lo + hi) / 2
+            lo, hi = (mid, hi) if sum(_largos(dur_voz, mid)) > OBJETIVO else (lo, mid)
+    f = hi if sum(_largos(dur_voz, lo)) > OBJETIVO else lo
+    largos = _largos(dur_voz, f)
     NUEVOS = [0.0]
     for k, (st, md, quien, txt) in enumerate(GUION):
-        y = voz(quien, txt, 99, k + 1)
-        lead = st - TRAMOS[k]
-        largo_orig = TRAMOS[k + 1] - TRAMOS[k]
-        largo = max(largo_orig, len(y) / SR / MAX_ACELERA + lead + COLA[k])
-        hueco = max(md, largo - lead - COLA[k])
-        if len(y) / SR > hueco:
-            y = voz(quien, txt, hueco, k + 1)
-        VOCES[k] = y
-        NUEVOS.append(NUEVOS[-1] + largo)
+        hueco = largos[k] - (st - TRAMOS[k]) - COLA[k]
+        VOCES[k] = voz(quien, txt, max(hueco, 0.2), k + 1)
+        NUEVOS.append(NUEVOS[-1] + largos[k])
     DUR = NUEVOS[-1]
     NF = int(round(FPS * DUR))
+    print(f"voces aceleradas x{f:.2f}")
 
 def a_original(tn):
     """Tiempo del video final -> tiempo de la animación original (10 s)."""

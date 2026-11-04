@@ -3,8 +3,8 @@
 `python3 render.py` crea `frutinovela_amor.mp4` (1080x1920, 30 fps).
 
 La carpeta `voces/` ya trae las 10 voces de ElevenLabs (Betty, Ezequiel, Yadira y Josué Maya).
-El video se alarga solo para que cada frase quepa con su ritmo natural: con estas voces
-dura unos 19 s; con las voces sintéticas de respaldo, 10 s.
+El corto dura 12 s: las voces se aceleran por igual (sin cambiar el tono) para que quepan.
+Para otra duración: `FRUTINOVELA_DURACION=19 python3 render.py` (19 s = voces a ritmo casi natural).
 
 ## Voces con ElevenLabs
 
