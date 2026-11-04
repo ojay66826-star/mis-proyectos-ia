@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Logo animado (GSAP)</title>
+<style>
+  html,body{margin:0;height:100%;background:#0e1018;overflow:hidden;font-family:"DejaVu Sans",Inter,system-ui,sans-serif}
+  .stage{position:absolute;inset:0;display:grid;place-items:center}
+  .mark{width:28vmin;height:28vmin;position:relative}
+  .ring{position:absolute;inset:0}
+  .disc{position:absolute;inset:12%;border-radius:50%;background:var(--c);display:grid;place-items:center;color:#fff;font-weight:800;font-size:11vmin;transform:scale(0)}
+  .name{margin-top:5vmin;color:#fff;font-weight:800;font-size:7vmin;letter-spacing:.08em;display:flex;gap:.02em}
+  .name span{display:inline-block;opacity:0;transform:translateY(40px)}
+  .tag{color:#9aa4bd;font-size:3.2vmin;opacity:0;margin-top:1.5vmin;text-align:center}
+  .shine{position:absolute;top:0;bottom:0;width:12vw;left:-20vw;background:linear-gradient(100deg,transparent,rgba(255,255,255,.25),transparent);transform:skewX(-20deg)}
+</style></head>
+<body>
+<div class="stage"><div style="text-align:center">
+  <div class="mark"><svg class="ring" viewBox="0 0 100 100"><circle id="ring" cx="50" cy="50" r="45" fill="none" stroke="var(--c)" stroke-width="6" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" transform="rotate(-90 50 50)"/></svg>
+  <div class="disc" id="disc"></div></div>
+  <div class="name" id="name"></div><div class="tag" id="tag"></div>
+</div></div>
+<div class="shine" id="shine"></div>
+<script src="../../node_modules/gsap/dist/gsap.min.js"></script>
+<script>
+  const q = new URLSearchParams(location.search);
+  const text = q.get("text") || "Estudio IA", tag = q.get("tag") || "Animación con inteligencia artificial";
+  document.documentElement.style.setProperty("--c", q.get("color") || "#3a86ff");
+  document.getElementById("disc").textContent = text.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase();
+  const name = document.getElementById("name");
+  for (const ch of text.toUpperCase()) { const s=document.createElement("span"); s.textContent = ch === " " ? " " : ch; name.appendChild(s); }
+  document.getElementById("tag").textContent = tag;
+  const tl = gsap.timeline({ paused: true });
+  tl.to("#ring", { strokeDashoffset: 0, duration: 0.9, ease: "power2.inOut" })
+    .to("#disc", { scale: 1, duration: 0.8, ease: "elastic.out(1, 0.45)" }, 0.6)
+    .to("#name span", { opacity: 1, y: 0, duration: 0.45, stagger: 0.04, ease: "back.out(2)" }, 1.2)
+    .to("#tag", { opacity: 1, duration: 0.5 }, 2.0)
+    .to("#shine", { left: "110vw", duration: 0.9, ease: "power1.inOut" }, 2.2)
+    .to({}, { duration: 1.0 });
+  window.__duration = tl.duration();
+  window.__seek = (t) => { tl.seek(t, false); };
+  window.__ready = true;
+  if (!q.has("capture")) tl.play();
+</script>
+</body></html>
