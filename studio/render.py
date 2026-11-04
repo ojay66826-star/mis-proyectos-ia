@@ -213,8 +213,11 @@ class SceneRenderer:
             cap = s.get("caption")
             if cap and 0.3 < lt < min(s["duration"], 3.0) and not (T < 2.2 and s is self.spec["scenes"][0]):
                 f = font(int(H * (0.055 if W > H else 0.04)))
-                tw = d.textlength(cap, font=f)
-                d.text((W / 2 - tw / 2, H * 0.14), cap, font=f, fill=(255, 255, 255), stroke_width=max(2, f.size // 12), stroke_fill=(20, 20, 30))
+                yy = H * 0.14
+                for ln in _wrap(d, cap, f, W * 0.88):
+                    tw = d.textlength(ln, font=f)
+                    d.text((W / 2 - tw / 2, yy), ln, font=f, fill=(255, 255, 255), stroke_width=max(2, f.size // 12), stroke_fill=(20, 20, 30))
+                    yy += f.size * 1.2
             if not self.spec.get("subtitles"):
                 continue
             for dl in s["dialogue"]:
@@ -223,7 +226,9 @@ class SceneRenderer:
                     txt = dl["text"] if big else f"{name}: {dl['text']}"
                     f = font(int(H * (0.042 if not big else 0.034 if W < H else 0.06)))
                     lines = _wrap(d, txt, f, W * 0.86)
-                    y = H * (0.86 if not big else 0.7) - len(lines) * f.size * 1.2
+                    # en vertical los personajes ocupan la franja 55-90 %: subtítulos en el tercio medio superior
+                    base = 0.86 if not big else (0.44 if W < H else 0.7)
+                    y = H * base - len(lines) * f.size * 1.2
                     for ln in lines:
                         tw = d.textlength(ln, font=f)
                         if big:
