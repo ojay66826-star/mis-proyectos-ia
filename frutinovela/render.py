@@ -2,6 +2,7 @@
 
 Todo se genera por código: personajes dibujados, cámara, subtítulos y sonido.
 Uso:  python3 render.py   -> crea frutinovela_amor.mp4 en esta carpeta
+Voces: espeak-ng + MBROLA (apt install espeak-ng mbrola mbrola-es3 mbrola-mx1 mbrola-mx2)
 """
 import math, os, random, subprocess, wave
 import numpy as np
@@ -350,9 +351,69 @@ def frame(i):
         d.text((W / 2 - tw / 2, y), txt, font=f, fill=col, stroke_width=8, stroke_fill=(80, 0, 30))
     heart(d, W / 2, 960, 60 + 8 * math.sin(lt * 14), (230, 0, 60))
     img = camera(img, zoom=1.0 + 0.03 * lt, t=lt, shake=0.5 if lt > 0.55 else 0)
-    if lt > 0.55:
-        img = caption(img, "BRRRRRRRR...", 9.25, t, y=1250, size=80, col=(200, 220, 255))
+    if lt > 0.7:
+        img = caption(img, "BRRRRRRRR...", 9.4, t, y=1250, size=80, col=(200, 220, 255))
     return caption(img, "CONTINUARÁ...", 8.8, t, y=1060, size=86)
+
+# ----------------------------------------------------------------- voces
+# Fonemas que espeak-ng genera pero las voces MBROLA no tienen -> equivalentes
+PHO_FIX = {"e/": ["e"], "o/": ["o"], "h": ["r"], "oI": ["o", "i"], "jj": ["j"], "L": ["l"]}
+#            voz espeak, base MBROLA, velocidad, tono, factor de frecuencia
+REPARTO = {"fresa":    ("mb-es3", "es3", 190, 80, 1.18),   # dama joven, aguda
+           "platano":  ("mb-mx2", "mx2", 185, 45, 1.0),    # galán mexicano
+           "pina":     ("mb-es3", "es3", 160, 25, 0.78),   # villana, grave
+           "narrador": ("mb-mx1", "mx1", 150, 15, 0.8)}
+
+def _pho(ev, text, speed, pitch):
+    out = subprocess.run(["espeak-ng", "-v", ev, "-q", "--pho", "-s", str(speed), "-p", str(pitch), text],
+                         capture_output=True, text=True, check=True).stdout
+    res = []
+    for ln in out.splitlines():
+        parts = ln.split()
+        if not parts:
+            continue
+        new = PHO_FIX.get(parts[0])
+        if new is None:
+            res.append(ln); continue
+        dur = int(parts[1]) // len(new)
+        for k, ph in enumerate(new):
+            res.append(" ".join([ph, str(dur)] + (parts[2:] if k == 0 else [])))
+    return "\n".join(res) + "\n"
+
+def voz(quien, text, max_dur):
+    """Sintetiza una línea y la ajusta para que dure como máximo max_dur segundos."""
+    ev, db, speed, pitch, fr = REPARTO[quien]
+    tmp = os.path.join(HERE, "_voz")
+    with open(tmp + ".pho", "w") as f:
+        f.write(_pho(ev, text, speed, pitch))
+    tr = 1.0
+    for _ in range(2):  # 2ª pasada: comprime el tiempo si no cabe
+        subprocess.run(["mbrola", "-e", "-f", str(fr), "-t", str(tr), f"/usr/share/mbrola/{db}/{db}",
+                        tmp + ".pho", tmp + ".wav"], check=True, capture_output=True)
+        with wave.open(tmp + ".wav") as w:
+            sr = w.getframerate()
+            y = np.frombuffer(w.readframes(w.getnframes()), np.int16).astype(np.float64) / 32768
+        nz = np.nonzero(np.abs(y) > 0.01)[0]
+        y = y[nz[0]:nz[-1] + 1] if len(nz) else y      # recorta silencios
+        if len(y) / sr <= max_dur:
+            break
+        tr *= max_dur / (len(y) / sr) * 0.97
+    os.remove(tmp + ".pho"); os.remove(tmp + ".wav")
+    y = np.interp(np.arange(int(len(y) * SR / sr)) / SR, np.arange(len(y)) / sr, y)
+    y *= np.minimum(1, np.arange(len(y)) / (0.01 * SR)) * np.minimum(1, (len(y) - np.arange(len(y))) / (0.02 * SR))
+    return y / (np.max(np.abs(y)) + 1e-9)
+
+#          inicio, duración máx, personaje, texto
+GUION = [(0.08, 1.40, "fresa",    "¡¿Me engañaste con la piña?!"),
+         (1.52, 1.35, "platano",  "¡No es lo que parece, fresita!"),
+         (2.93, 0.42, "pina",     "¡Alto ahí!"),
+         (3.36, 1.20, "pina",     "¡Fresa! ¡Soy tu madre!"),
+         (4.62, 0.36, "fresa",    "¿Mamá?"),
+         (5.02, 0.36, "platano",  "¿Suegra?"),
+         (5.42, 0.38, "fresa",    "¿Y mi papá?"),
+         (5.85, 1.22, "platano",  "Me da igual. ¿Te casas conmigo?"),
+         (7.13, 1.00, "fresa",    "¡Sí, mi platanito!"),
+         (8.78, 0.65, "narrador", "Continuará.")]
 
 # ----------------------------------------------------------------- audio
 def build_audio(path):
@@ -404,7 +465,19 @@ def build_audio(path):
     add(tone([hz(38), hz(45), hz(50), hz(53)], 1.3, decay=1.5), 8.7, 0.9)
     bl = np.arange(int(SR * 0.75)) / SR
     blender = (np.sign(np.sin(2 * np.pi * (110 + 60 * bl) * bl)) * 0.5 + noise(0.75, sweep=False) * 0.8) * np.minimum(1, bl / 0.15)
-    add(blender, 9.25, 0.35)
+    add(blender, 9.4, 0.35)
+    # voces encima, con la música bajando cuando alguien habla
+    music = out / (np.max(np.abs(out)) + 1e-9)
+    vox = np.zeros(n)
+    for st, md, quien, txt in GUION:
+        y = voz(quien, txt, md)
+        if quien == "pina" and "madre" in txt:   # eco de revelación
+            y = np.concatenate([y, np.zeros(int(SR * 0.6))])
+            for k, g in ((0.15, 0.45), (0.3, 0.25), (0.45, 0.12)):
+                d_ = int(SR * k); y[d_:] += y[:-d_] * g
+        s0 = int(st * SR); e0 = min(n, s0 + len(y)); vox[s0:e0] += y[:e0 - s0]
+    act = np.convolve((np.abs(vox) > 0.02).astype(float), np.ones(int(SR * 0.08)) / int(SR * 0.08), mode="same")
+    out = music * (1 - 0.6 * np.clip(act * 3, 0, 1)) * 0.75 + vox * 0.95
     out[-int(SR * 0.08):] *= np.linspace(1, 0, int(SR * 0.08))
     out = out / (np.max(np.abs(out)) + 1e-9) * 0.9
     pcm = (out * 32767).astype(np.int16)
