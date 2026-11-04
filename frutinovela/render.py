@@ -2,8 +2,13 @@
 
 Todo se genera por código: personajes dibujados, cámara, subtítulos y sonido.
 Uso:  python3 render.py   -> crea frutinovela_amor.mp4 en esta carpeta
-Voces: espeak-ng + MBROLA (apt install espeak-ng mbrola mbrola-es3 mbrola-mx1 mbrola-mx2)
+Voces, en este orden de prioridad para cada línea del GUION:
+  1. Un audio tuyo en voces/NN_personaje.(mp3|wav) (p. ej. voces/04_pina.mp3)
+  2. ElevenLabs, si existe la variable ELEVENLABS_API_KEY (se guarda en voces/ para
+     no gastar créditos al volver a renderizar)
+  3. espeak-ng + MBROLA (apt install espeak-ng mbrola mbrola-es3 mbrola-mx1 mbrola-mx2)
 """
+import json, urllib.request
 import math, os, random, subprocess, wave
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
@@ -380,7 +385,63 @@ def _pho(ev, text, speed, pitch):
             res.append(" ".join([ph, str(dur)] + (parts[2:] if k == 0 else [])))
     return "\n".join(res) + "\n"
 
-def voz(quien, text, max_dur):
+# ElevenLabs: voces prediseñadas (se pueden cambiar con ELEVENLABS_VOZ_FRESA, etc.)
+ELEVEN = {"fresa": "EXAVITQu4vr4xnSDxMaL",     # Sarah
+          "platano": "TX3LPaxmHKxFdv7VOQHJ",   # Liam
+          "pina": "pFZP5JQG7iQjIQuC4Bku",      # Lily
+          "narrador": "nPczCjzI2devNBz1zQrb"}  # Brian
+ELEVEN_ESTILO = {"fresa": (0.25, 0.8), "platano": (0.35, 0.6), "pina": (0.3, 0.9), "narrador": (0.6, 0.3)}
+VOCES_DIR = os.path.join(HERE, "voces")
+
+def _elevenlabs(quien, text, path):
+    key = os.environ["ELEVENLABS_API_KEY"]
+    vid = os.environ.get(f"ELEVENLABS_VOZ_{quien.upper()}", ELEVEN[quien])
+    stab, style = ELEVEN_ESTILO[quien]
+    body = json.dumps({"text": text, "model_id": os.environ.get("ELEVENLABS_MODELO", "eleven_multilingual_v2"),
+                       "voice_settings": {"stability": stab, "similarity_boost": 0.8, "style": style,
+                                          "use_speaker_boost": True}}).encode()
+    req = urllib.request.Request(f"https://api.elevenlabs.io/v1/text-to-speech/{vid}?output_format=mp3_44100_128",
+                                 data=body, headers={"xi-api-key": key, "Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=60) as r, open(path, "wb") as f:
+        f.write(r.read())
+
+def _cargar_audio(path, max_dur):
+    """Decodifica con ffmpeg a mono 44.1 kHz y acelera (sin cambiar el tono) si no cabe."""
+    def dec(filtros):
+        cmd = ["ffmpeg", "-v", "error", "-i", path, "-ac", "1", "-ar", str(SR)]
+        if filtros:
+            cmd += ["-af", filtros]
+        raw = subprocess.run(cmd + ["-f", "f32le", "-"], capture_output=True, check=True).stdout
+        y = np.frombuffer(raw, np.float32).astype(np.float64)
+        nz = np.nonzero(np.abs(y) > 0.01 * (np.max(np.abs(y)) + 1e-9))[0]
+        return y[nz[0]:nz[-1] + 1] if len(nz) else y
+    y = dec(None)
+    f = len(y) / SR / max_dur
+    if f > 1:
+        tempos = []
+        while f > 2:
+            tempos.append("atempo=2.0"); f /= 2
+        tempos.append(f"atempo={f * 1.02:.4f}")
+        y = dec(",".join(["silenceremove=start_periods=1:start_threshold=-40dB"] + tempos))
+    return y[:int(max_dur * SR)]
+
+def voz(quien, text, max_dur, idx=None):
+    """Audio de una línea del guion, como máximo de max_dur segundos."""
+    if idx is not None:
+        base = os.path.join(VOCES_DIR, f"{idx:02d}_{quien}")
+        for ext in (".mp3", ".wav", ".m4a", ".ogg"):
+            if os.path.exists(base + ext):
+                y = _cargar_audio(base + ext, max_dur)
+                return y / (np.max(np.abs(y)) + 1e-9)
+        if os.environ.get("ELEVENLABS_API_KEY"):
+            os.makedirs(VOCES_DIR, exist_ok=True)
+            print(f"ElevenLabs -> {quien}: {text}")
+            _elevenlabs(quien, text, base + ".mp3")
+            y = _cargar_audio(base + ".mp3", max_dur)
+            return y / (np.max(np.abs(y)) + 1e-9)
+    return voz_mbrola(quien, text, max_dur)
+
+def voz_mbrola(quien, text, max_dur):
     """Sintetiza una línea y la ajusta para que dure como máximo max_dur segundos."""
     ev, db, speed, pitch, fr = REPARTO[quien]
     tmp = os.path.join(HERE, "_voz")
@@ -469,8 +530,8 @@ def build_audio(path):
     # voces encima, con la música bajando cuando alguien habla
     music = out / (np.max(np.abs(out)) + 1e-9)
     vox = np.zeros(n)
-    for st, md, quien, txt in GUION:
-        y = voz(quien, txt, md)
+    for idx, (st, md, quien, txt) in enumerate(GUION, 1):
+        y = voz(quien, txt, md, idx)
         if quien == "pina" and "madre" in txt:   # eco de revelación
             y = np.concatenate([y, np.zeros(int(SR * 0.6))])
             for k, g in ((0.15, 0.45), (0.3, 0.25), (0.45, 0.12)):
