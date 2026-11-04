@@ -17,3 +17,11 @@ Requisitos de HyperFrames: Node.js ≥ 22, FFmpeg y Chrome/Chromium; usa `npx hy
 Recomendado: `HYPERFRAMES_NO_TELEMETRY=1`. El render en la nube y los avatares usan cuenta/créditos de HeyGen (de pago): no son necesarios para render local.
 
 No instalada: "Aura.js Web Motion Toolkit" — no existe ninguna Skill ni librería con ese nombre en fuentes verificables.
+
+## Verificación de HyperFrames (2026-11-04)
+
+Render local de prueba correcto con `hyperframes@0.9.13` (5 s, 1920×1080, 30 fps, H.264, 8,5 s de render),
+`check` sin errores. Nota para este entorno: el Chromium del renderizador no usa el proxy de salida, así que
+los `<script>` desde CDN fallan (`sub_timeline_script_failure`). Solución: guardar GSAP en el proyecto
+(`npm pack gsap@<versión>` → `assets/vendor/gsap.min.js`) y referenciarlo como `assets/vendor/gsap.min.js`.
+Exporta `HYPERFRAMES_NO_TELEMETRY=1` antes de usar la CLI.
