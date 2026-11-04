@@ -16,7 +16,7 @@ python -m studio doctor --online # si tu red llega a cada servicio
 | **Blender 4.0** (EEVEE/Workbench/Cycles) | 3D, GLB | — | gratis | ✅ Probado |
 | **FFmpeg 6.1** | edición, codificación, QC | — | gratis | ✅ Probado |
 | **espeak-ng** | voces en español (es-419) | — | gratis | ✅ Probado |
-| **Three.js 0.170 / GSAP 3.15 / lottie-web 5.12** | animación web | — | gratis | ✅ Probado (captura con Chromium) |
+| **Three.js 0.170 / GSAP 3.15 / lottie-web 5.13** | animación web | — | gratis | ✅ Probado (captura con Chromium) |
 | **Remotion 4.0.290** | video con React | — | gratis para personas y empresas pequeñas ([licencia](https://www.remotion.dev/license)) | ✅ Probado |
 | **Pollinations.ai** | imágenes FLUX sin cuenta | — | gratis | ⚠️ Implementado, **no probado** (el dominio estaba bloqueado en el entorno de construcción) |
 | **Hugging Face Inference** | imágenes FLUX.1-schnell | `HF_TOKEN` | gratis con límite | ⚠️ Implementado, no probado (sin token) |

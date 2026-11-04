@@ -34,7 +34,8 @@ _tex_cache = {}
 def _noise(size, seed, scale=1, blur=0):
     key = (size, seed, scale, blur)
     if key not in _tex_cache:
-        r = np.random.default_rng(abs(hash(seed)) % (2 ** 32))
+        import zlib
+        r = np.random.default_rng(zlib.crc32(str(seed).encode()))
         w, h = size
         n = r.random((max(1, h // scale), max(1, w // scale))).astype(np.float32)
         im = Image.fromarray((n * 255).astype(np.uint8)).resize((w, h), Image.BICUBIC)

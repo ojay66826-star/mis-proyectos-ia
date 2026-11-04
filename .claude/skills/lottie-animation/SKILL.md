@@ -7,7 +7,7 @@ description: Genera animaciones Lottie (JSON Bodymovin v5) sin After Effects: ca
 
 **Categoría:** Diseño y movimiento · **Skills relacionadas:** `svg-animation`, `mascot-animation`, `seamless-loop-animation`
 
-`studio/lottie.py` escribe JSON Lottie válido (probado con lottie-web 5.12): personaje con cuerpo, hoja, brillo, ojos con parpadeo, pupilas, mejillas y boca, rebote con squash & stretch y sombra que escala. `lottie-player.html` lo reproduce y `__seek` permite capturarlo. Recuerda: en Lottie el primer elemento de la lista se dibuja encima.
+`studio/lottie.py` escribe JSON Lottie válido (probado con lottie-web 5.13): personaje con cuerpo, hoja, brillo, ojos con parpadeo, pupilas, mejillas y boca, rebote con squash & stretch y sombra que escala. `lottie-player.html` lo reproduce y `__seek` permite capturarlo. Recuerda: en Lottie el primer elemento de la lista se dibuja encima.
 
 ## Cuándo usar esta Skill
 
@@ -43,7 +43,7 @@ Sticker de mascota para Telegram: generar Lottie, convertir a `.tgs` (gzip del J
 | Herramienta | Uso | Estado en el estudio |
 |---|---|---|
 | studio/lottie.py | generador Lottie | ✅ motor propio del estudio |
-| lottie-web 5.12 | reproducción y captura | ✅ instalado y probado |
+| lottie-web 5.13 | reproducción y captura | ✅ instalado y probado |
 | LottieFiles | editor/preview online | 🌐 gratis, requiere internet |
 | After Effects + Bodymovin | Lottie complejo | 💻 programa externo recomendado |
 

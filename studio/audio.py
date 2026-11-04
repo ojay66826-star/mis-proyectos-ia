@@ -195,8 +195,15 @@ def tone(freq, dur, kind="sine", vol=0.3, env=(0.01, 0.1, 0.7, 0.2)):
     return (w * _env(n, *env) * vol).astype(np.float32)
 
 
+def _seed(seed) -> int:
+    if isinstance(seed, (int, np.integer)):
+        return int(seed)
+    import zlib
+    return zlib.crc32(str(seed).encode("utf-8"))
+
+
 def noise(dur, seed=0):
-    return np.random.default_rng(seed).uniform(-1, 1, int(dur * SR)).astype(np.float32)
+    return np.random.default_rng(_seed(seed)).uniform(-1, 1, int(dur * SR)).astype(np.float32)
 
 
 def smooth(x, k):
@@ -379,7 +386,7 @@ def synth_sfx(name: str, dur: float = None, seed=0) -> np.ndarray:
             out = smooth(nz, 80) * 2.0 * (0.6 + 0.4 * np.sin(np.arange(len(nz)) / SR * 0.7))
         else:
             out = smooth(nz, 25) * 0.6
-            cr = np.random.default_rng(seed).random(len(nz)) < 0.0008
+            cr = np.random.default_rng(_seed(seed)).random(len(nz)) < 0.0008
             out += np.convolve(cr.astype(np.float32), np.exp(-np.arange(200) / 30), mode="same") * 0.4
         return out.astype(np.float32)
     if name == "energy":

@@ -94,7 +94,7 @@ Verificación: `python3 -m studio check-skills`. Para editarlas en bloque: `scri
 | Herramienta | Estado |
 |---|---|
 | FFmpeg 6.1, Blender 4.0.2 (EEVEE/Workbench/Cycles), espeak-ng, sox | ✅ instalados y probados |
-| Three.js 0.170, GSAP 3.15, lottie-web 5.12 (locales, sin CDN) | ✅ probados con captura Chromium |
+| Three.js 0.170, GSAP 3.15, lottie-web 5.13 (locales, sin CDN) | ✅ probados con captura Chromium |
 | Remotion 4.0.290 | ✅ probado |
 | Pollinations, Hugging Face, OpenAI, Stability (imágenes) | ⚠️ implementados, requieren red/clave — ver [`docs/APIS.md`](docs/APIS.md) |
 | Replicate (video IA), ElevenLabs / OpenAI (voces), Claude (guiones) | ⚠️ implementados, requieren clave |
