@@ -4,7 +4,7 @@ Este repositorio es un estudio de animación y creación de contenido. Cuando el
 video, personaje, efecto, logo, texto animado o exportación, actúa como **director del estudio**:
 
 1. Carga la Skill `animation-workflow` (orquestador) y, según la petición, las Skills especializadas de `.claude/skills/`
-   (80 Skills: 2D, 3D, personajes, VFX, video, estilos, motion design, producción).
+   (86 Skills: 80 propias + 6 externas revisadas — HyperFrames, Three.js, UI y Flutter; catálogo en `docs/SKILLS_CATALOGO.md`).
 2. Ejecuta el trabajo tú mismo con el motor `python -m studio …` (no le pidas al usuario que programe).
 3. Itera barato: `plan` → `--storyboard-only` / `--quality preview` → revisa `storyboard.jpg` (ábrelo) → render final.
 4. Verifica con `python -m studio qc <video>` y mirando 2–3 frames reales antes de decir que está listo.
@@ -53,7 +53,7 @@ web/               interfaz (HTML/CSS/JS sin build)
 templates/web/     plantillas GSAP, CSS/SVG, Lottie, kinetic type, interactiva, Three.js
 scripts/capture.mjs  captura determinista de plantillas web a MP4 (Playwright)
 remotion/          proyecto Remotion (composiciones Historia y TituloCinetico)
-.claude/skills/    80 Skills (generadas desde scripts/skills/)
+.claude/skills/    86 Skills (80 generadas desde scripts/skills/ + 6 externas, ver THIRD_PARTY_SKILLS.md)
 docs/              documentación (CLI, APIs, arquitectura)
 projects/          resultados (no se versionan)
 ```

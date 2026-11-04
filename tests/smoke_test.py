@@ -52,7 +52,7 @@ def main():
     OUT.mkdir(parents=True)
     o = lambda n: str(OUT / n)  # noqa: E731
     run("doctor", PY + ["doctor"])
-    run("check-skills (80 Skills)", PY + ["check-skills"])
+    run("check-skills", PY + ["check-skills"])
     run("hoja de personaje", PY + ["character", "fresa", "--name", "Fresita", "--accessory", "bow", "-o", o("fresita.png")], o("fresita.png"))
     run("plan (local)", PY + ["plan", "Haz una historia con frutas animadas", "-o", o("plan.json")], o("plan.json"))
     run("plan --ai (sin clave → local)", PY + ["plan", "Una fábula de un conejo", "--ai", "-o", o("plan_ai.json")], o("plan_ai.json"))
