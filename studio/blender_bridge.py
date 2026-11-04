@@ -39,6 +39,15 @@ def render_3d(spec, out: Path, quality="hd", cb=None, engine=None):
                glb=str(out / "personaje.glb"), save_blend=spec.get("save_blend", True), tempo=110)
     _log(cb, "blender", 0.1, f"renderizando en Blender ({engine})…")
     _run_blender(job, cb)
+    # rótulos, título y subtítulos (mismo aspecto que en 2D)
+    from PIL import Image
+    from .render import SceneRenderer
+    ov = SceneRenderer(spec, quality if quality != "fullhd" else "hd")
+    for si, s in enumerate(spec["scenes"]):
+        for f in sorted(frames_dir.glob(f"s{si + 1:02d}_*.png")):
+            i = int(f.stem.split("_")[1]) - 1
+            T = s["start"] + i / spec["fps"]
+            ov.overlays(Image.open(f).convert("RGB"), T, int(T * spec["fps"])).save(f)
     clips = []
     for si, s in enumerate(spec["scenes"]):
         clip = out / f"_s{si + 1}.mp4"

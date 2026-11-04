@@ -229,7 +229,7 @@ def animated_logo(name, out, tagline="", color="#3a86ff", duration=4.0, fmt="16:
     return enc.close(music, duration, sfx)
 
 
-def infographic(data: dict, out, title="Datos", duration=6.0, fmt="16:9", fps=30, palette="vibrante", quality="hd", unit=""):
+def infographic(data: dict, out, title="Datos", duration=6.0, fmt="16:9", fps=30, palette="vibrante", quality="hd", unit="", music="calm"):
     """Gráfico de barras animado con contadores (infografía educativa)."""
     W, H = canvas_size(fmt, quality)
     cols = [hex2rgb(c) for c in PALETTES.get(palette, PALETTES["vibrante"])]
@@ -246,6 +246,8 @@ def infographic(data: dict, out, title="Datos", duration=6.0, fmt="16:9", fps=30
         img = Image.new("RGB", (W, H), (248, 247, 242))
         d = ImageDraw.Draw(img)
         a = clamp(t / 0.5)
+        while d.textlength(title, font=ft) > W * 0.9 and ft.size > 12:
+            ft = font(int(ft.size * 0.92))
         tw = d.textlength(title, font=ft)
         d.text((W / 2 - tw / 2, H * 0.06 + (1 - a) * 20), title, font=ft, fill=mix((248, 247, 242), (30, 30, 40), a))
         d.line([(left, bottom), (right, bottom)], fill=(120, 120, 120), width=3)
@@ -262,4 +264,4 @@ def infographic(data: dict, out, title="Datos", duration=6.0, fmt="16:9", fps=30
             lw = d.textlength(str(label), font=fl)
             d.text(((x0 + x1) / 2 - lw / 2, bottom + 10), str(label), font=fl, fill=(70, 70, 80))
         enc.write(img)
-    return enc.close("calm", duration, sfx)
+    return enc.close(music, duration, sfx)

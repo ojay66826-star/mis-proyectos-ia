@@ -112,6 +112,49 @@ def concat(videos, out, transition="fade", dur=0.5):
     return Path(out)
 
 
+def montage(clips, out, transitions="fade", dur=0.5, size=(1080, 1920), fps=24, music=None, music_gain=0.35):
+    """Une clips heterogéneos (distinto tamaño, fps o sin audio) con transiciones xfade
+    por clip + fundido de audio, y opcionalmente una música de fondo continua que se
+    atenúa automáticamente cuando hay voz (sidechain)."""
+    W, H = size
+    tmp = Path(out).parent / "_montaje"
+    tmp.mkdir(parents=True, exist_ok=True)
+    norm = []
+    for i, c in enumerate(clips):
+        n = tmp / f"n{i:02d}.mp4"
+        has_audio = probe(c)["acodec"] is not None
+        args = ["-i", c]
+        if not has_audio:
+            args += ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo"]
+        ff(*args, "-vf", f"scale={W}:{H}:force_original_aspect_ratio=decrease:flags=lanczos,pad={W}:{H}:(ow-iw)/2:(oh-ih)/2,fps={fps},format=yuv420p,setsar=1",
+           "-map", "0:v", "-map", "0:a" if has_audio else "1:a", "-shortest", "-c:v", "libx264", "-crf", 18,
+           "-c:a", "aac", "-ar", 44100, "-ac", 2, n)
+        norm.append(n)
+    trans = transitions if isinstance(transitions, list) else [transitions] * (len(norm) - 1)
+    durs = [probe(v)["duration"] for v in norm]
+    inputs = []
+    for v in norm:
+        inputs += ["-i", v]
+    fc, lv, la, off = [], "[0:v]", "[0:a]", 0.0
+    for i in range(1, len(norm)):
+        off += durs[i - 1] - dur
+        fc.append(f"{lv}[{i}:v]xfade=transition={trans[i - 1]}:duration={dur}:offset={off:.3f}[v{i}]")
+        fc.append(f"{la}[{i}:a]acrossfade=d={dur}[a{i}]")
+        lv, la = f"[v{i}]", f"[a{i}]"
+    joined = tmp / "unido.mp4"
+    ff(*inputs, "-filter_complex", ";".join(fc), "-map", lv, "-map", la, "-c:v", "libx264", "-crf", 18, "-pix_fmt", "yuv420p",
+       "-c:a", "aac", "-b:a", "192k", joined)
+    if music:
+        ff("-i", joined, "-i", music, "-filter_complex",
+           f"[0:a]asplit=2[voz][sc];[1:a]volume={music_gain}[m];[m][sc]sidechaincompress=threshold=0.02:ratio=8:attack=20:release=500[md];"
+           "[voz][md]amix=inputs=2:normalize=0:duration=first[a]",
+           "-map", "0:v", "-map", "[a]", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", out)
+    else:
+        shutil.copy(joined, out)
+    shutil.rmtree(tmp, ignore_errors=True)
+    return Path(out)
+
+
 def add_audio(video, audio, out, volume=1.0):
     ff("-i", video, "-i", audio, "-filter_complex", f"[1:a]volume={volume}[a]", "-map", "0:v", "-map", "[a]",
        "-c:v", "copy", "-c:a", "aac", "-shortest", out)
