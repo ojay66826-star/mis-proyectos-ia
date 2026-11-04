@@ -24,8 +24,52 @@
 
     <section id="servicios" class="tarjetas">
       <article><h2>🌐 Páginas web</h2><p>Sitios rápidos y bonitos que se ven bien en el móvil.</p></article>
-      <article><h2>🎨 Imágenes</h2><p>Ilustraciones y gráficos generados a medida.</p></article>
-      <article><h2>🎬 Video</h2><p>Animaciones cortas para redes sociales.</p></article>
+      <article><h2>🎨 Imágenes</h2><p>Ilustraciones y gráficos generados a medida.</p><a class="boton boton-chico" href="#crear-imagen">Crear imagen</a></article>
+      <article><h2>🎬 Video</h2><p>Animaciones cortas para redes sociales.</p><a class="boton boton-chico" href="#crear-video">Crear video</a></article>
+    </section>
+
+    <section class="estudio">
+      <h2>Estudio creativo</h2>
+      <p class="sub">Crea imágenes y videos al instante, directamente en tu navegador.</p>
+
+      <div class="herramientas">
+        <article id="crear-imagen" class="herramienta">
+          <h3>🎨 Crear imagen</h3>
+          <canvas id="lienzo-imagen" width="1024" height="1024"></canvas>
+          <label>Texto (opcional)<input id="img-texto" placeholder="Ej.: Feliz lunes" maxlength="40"></label>
+          <label>Estilo
+            <select id="img-paleta">
+              <option value="atardecer">Atardecer</option>
+              <option value="oceano">Océano</option>
+              <option value="bosque">Bosque</option>
+            </select>
+          </label>
+          <div class="acciones">
+            <button class="boton" id="img-generar">Generar otra</button>
+            <button class="boton boton-sec" id="img-descargar">Descargar PNG</button>
+          </div>
+          <p class="estado" id="img-estado" role="status"></p>
+        </article>
+
+        <article id="crear-video" class="herramienta">
+          <h3>🎬 Crear video</h3>
+          <canvas id="lienzo-video" width="720" height="720"></canvas>
+          <video id="video-resultado" controls playsinline loop hidden></video>
+          <label>Texto del video<input id="vid-texto" value="Hola, mundo" maxlength="30"></label>
+          <label>Duración
+            <select id="vid-segundos">
+              <option value="3">3 segundos</option>
+              <option value="5" selected>5 segundos</option>
+              <option value="8">8 segundos</option>
+            </select>
+          </label>
+          <div class="acciones">
+            <button class="boton" id="vid-crear">Crear video</button>
+            <button class="boton boton-sec" id="vid-descargar" disabled>Descargar video</button>
+          </div>
+          <p class="estado" id="vid-estado" role="status"></p>
+        </article>
+      </div>
     </section>
 
     <section id="contacto" class="contacto">
@@ -42,5 +86,6 @@
 
   <footer>Hecho con ✦ y IA · <span id="anio"></span></footer>
   <script src="script.js"></script>
+  <script src="estudio.js"></script>
 </body>
 </html>

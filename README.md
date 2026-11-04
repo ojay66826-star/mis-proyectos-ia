@@ -5,7 +5,7 @@ Cada carpeta es un proyecto independiente y ya funciona: puedes abrirlo, probarl
 
 | Carpeta | Qué es | Cómo verlo |
 |---|---|---|
-| `01-pagina-web/` | Página web de presentación con formulario de contacto | Doble clic en `index.html` |
+| `01-pagina-web/` | Página web con estudio creativo (crea imágenes y videos) y formulario | Doble clic en `index.html` |
 | `02-app-tareas/` | App de lista de tareas que recuerda tus datos | Doble clic en `index.html` |
 | `03-imagenes/` | Generador de imágenes (arte abstracto y con IA) | `python3 generar_arte.py` |
 | `04-videos/` | Generador de videos animados MP4 | `python3 crear_video.py` |
@@ -29,6 +29,7 @@ Cada carpeta es un proyecto independiente y ya funciona: puedes abrirlo, probarl
 - `index.html` → el **contenido** (textos, secciones).
 - `estilos.css` → el **aspecto** (colores, tamaños). Los colores están arriba del todo, en `:root`.
 - `script.js` → el **comportamiento** (qué pasa al pulsar "Enviar").
+- `estudio.js` → el **Estudio creativo**: botones *Crear imagen* (PNG con estilo y texto) y *Crear video* (MP4/WebM animado de 3–8 s). Todo se crea en el navegador, sin claves ni instalar nada.
 
 **Para verla:** abre `index.html` con tu navegador.
 **Para publicarla gratis en internet:** se puede activar *GitHub Pages* en este repositorio, o arrastrar la carpeta a [Netlify Drop](https://app.netlify.com/drop).
