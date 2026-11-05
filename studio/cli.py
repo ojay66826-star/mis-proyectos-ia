@@ -264,7 +264,7 @@ def cmd_check_skills(a):
             own += 1
             if len(txt) < 2500:
                 bad.append((s.name, f"contenido corto ({len(txt)} caracteres)"))
-    print(f"Skills encontradas: {len(skills)} ({own} del estudio, {len(skills) - own} de terceros)")
+    print(f"Skills encontradas: {len(skills)} ({own} generadas por el estudio, {len(skills) - own} instaladas aparte: terceros y propias)")
     for b in bad:
         print("  ✘", *b)
     print("OK" if not bad else f"{len(bad)} problema(s)")

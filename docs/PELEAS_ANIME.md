@@ -97,7 +97,13 @@ Lista completa y por categorías: `docs/SKILLS_CATALOGO.md`. Procedencia, licenc
 
 ## 6. Reinstalar en una sesión nueva
 
-Las Skills y los scripts están en el repositorio. Las herramientas del sistema (Blender, bpy 5.2, MediaPipe,
-Rhubarb, npm) se instalan con el script de configuración del entorno; si no está guardado, Claude puede
-reinstalarlas con los mismos comandos (`apt-get install blender espeak-ng sox python3-numpy libegl1 libgl1 …`,
-`pip install bpy==5.2.3`, `pip install mediapipe opencv-python-headless`, `npm ci`).
+Las Skills y los scripts están en el repositorio, pero las herramientas del sistema (Blender, bpy 5.2, MediaPipe,
+Rhubarb, paquetes npm) viven en el contenedor y se pierden al cerrarlo. En una sesión nueva, ejecuta (o pide a Claude
+que ejecute):
+
+```bash
+bash scripts/instalar_herramientas.sh    # apt + bpy 5.2 + MediaPipe + modelo de pose + Rhubarb (sha256) + npm ci
+python -m studio doctor                  # comprobar
+```
+
+También se puede guardar como script de configuración del entorno en la nube para que se ejecute solo en cada sesión.
