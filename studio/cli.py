@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 import time
@@ -247,17 +248,23 @@ def cmd_check_skills(a):
     d = ROOT / ".claude" / "skills"
     skills = sorted(p for p in d.iterdir() if p.is_dir())
     bad = []
+    own = 0
     for s in skills:
         f = s / "SKILL.md"
         if not f.exists():
             bad.append((s.name, "falta SKILL.md"))
             continue
         txt = f.read_text(encoding="utf-8")
-        if not txt.startswith("---") or f"name: {s.name}" not in txt.split("---")[1]:
+        head = txt.split("---")[1] if txt.startswith("---") else ""
+        if not txt.startswith("---") or not re.search(rf"^name:\s*['\"]?{re.escape(s.name)}['\"]?\s*$", head, re.M):
             bad.append((s.name, "frontmatter inválido"))
-        if len(txt) < 2500:
-            bad.append((s.name, f"contenido corto ({len(txt)} caracteres)"))
-    print(f"Skills encontradas: {len(skills)}")
+        # La longitud mínima solo aplica a las Skills generadas por el estudio (scripts/skills/build.py);
+        # las Skills de terceros (ver THIRD_PARTY_SKILLS.md) se instalan tal cual, sin rellenarlas.
+        if "**Categoría:**" in txt:
+            own += 1
+            if len(txt) < 2500:
+                bad.append((s.name, f"contenido corto ({len(txt)} caracteres)"))
+    print(f"Skills encontradas: {len(skills)} ({own} del estudio, {len(skills) - own} de terceros)")
     for b in bad:
         print("  ✘", *b)
     print("OK" if not bad else f"{len(bad)} problema(s)")

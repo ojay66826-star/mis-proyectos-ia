@@ -1,0 +1,68 @@
+#!/opt/blender5-py/bin/python
+"""blender5 — Blender 5.2 (módulo oficial `bpy` de PyPI) con la interfaz de línea de comandos de Blender.
+
+Implementa el subconjunto de flags que usan los scripts headless de las Skills blender-* (EL4CTEO):
+  blender5 -b [archivo.blend] [--factory-startup] [--python-exit-code N]
+           (-P|--python script.py | --python-expr "código") [-- args del script]
+  blender5 --version
+Uso con las Skills:  BLENDER_EXE=/usr/local/bin/blender5 python <skill>/scripts/run_in_blender.py ...
+El pipeline 3D del estudio sigue usando `blender` (4.0.2, apt).
+"""
+import runpy
+import sys
+import traceback
+
+argv = sys.argv[1:]
+rest = []
+if "--" in argv:
+    i = argv.index("--")
+    argv, rest = argv[:i], argv[i + 1:]
+
+if "--version" in argv or "-v" in argv:
+    import bpy
+    print(f"Blender {bpy.app.version_string} (bpy module)")
+    sys.exit(0)
+
+exit_code = 0
+blend = None
+factory = "--factory-startup" in argv
+script = expr = None
+i = 0
+while i < len(argv):
+    a = argv[i]
+    if a in ("-b", "--background", "--factory-startup", "-noaudio"):
+        pass
+    elif a == "--python-exit-code":
+        exit_code = int(argv[i + 1]); i += 1
+    elif a in ("-P", "--python"):
+        script = argv[i + 1]; i += 1
+    elif a == "--python-expr":
+        expr = argv[i + 1]; i += 1
+    elif a.endswith(".blend") and blend is None:
+        blend = a
+    else:
+        print(f"blender5: opción no soportada: {a}", file=sys.stderr)
+        sys.exit(2)
+    i += 1
+
+import bpy  # noqa: E402  (carga Blender 5.2)
+
+print(f"Blender {bpy.app.version_string} (bpy module)")
+try:
+    if factory and not blend:
+        bpy.ops.wm.read_factory_settings(use_empty=False)
+    if blend:
+        bpy.ops.wm.open_mainfile(filepath=blend)
+    # sys.argv conserva "--" y los argumentos del script, como en Blender
+    if expr is not None:
+        exec(compile(expr, "<python-expr>", "exec"), {"__name__": "__main__"})
+    elif script is not None:
+        runpy.run_path(script, run_name="__main__")
+except SystemExit as e:
+    code = e.code if isinstance(e.code, int) else (0 if e.code is None else 1)
+    sys.exit(code if code == 0 else (exit_code or code))
+except Exception:
+    traceback.print_exc()
+    sys.exit(exit_code or 1)
+print("Blender quit")
+sys.exit(0)

@@ -4,7 +4,8 @@ Este repositorio es un estudio de animación y creación de contenido. Cuando el
 video, personaje, efecto, logo, texto animado o exportación, actúa como **director del estudio**:
 
 1. Carga la Skill `animation-workflow` (orquestador) y, según la petición, las Skills especializadas de `.claude/skills/`
-   (86 Skills: 80 propias + 6 externas revisadas — HyperFrames, Three.js, UI y Flutter; catálogo en `docs/SKILLS_CATALOGO.md`).
+   (170 Skills: 80 del estudio, 89 externas revisadas y `anime-fight-production`; catálogo en `docs/SKILLS_CATALOGO.md`).
+   Para **peleas/combate de anime** carga `anime-fight-production` (guía: `docs/PELEAS_ANIME.md`).
 2. Ejecuta el trabajo tú mismo con el motor `python -m studio …` (no le pidas al usuario que programe).
 3. Itera barato: `plan` → `--storyboard-only` / `--quality preview` → revisa `storyboard.jpg` (ábrelo) → render final.
 4. Verifica con `python -m studio qc <video>` y mirando 2–3 frames reales antes de decir que está listo.
@@ -28,6 +29,9 @@ video, personaje, efecto, logo, texto animado o exportación, actúa como **dire
 | Post-producción | `export --preset youtube\|youtube_shorts\|tiktok\|instagram\|web\|whatsapp\|webm\|gif\|zip`, `upscale`, `interpolate`, `loop` |
 | Interfaz gráfica | `python -m studio serve` → http://127.0.0.1:8765 |
 | Pruebas | `python tests/smoke_test.py [--slow]` · `node tests/ui_test.mjs` (con el servidor activo) |
+| Blender 5.2 para Skills `blender-*` | `BLENDER_EXE=/usr/local/bin/blender5 python3 .claude/skills/blender-core/scripts/run_in_blender.py <script> -- …` |
+| Captura de movimiento desde video | `/opt/mocap-py/bin/python scripts/mocap/video_pose.py video.mp4 -o projects/mocap/<nombre>` |
+| Lip-sync por fonemas | `rhubarb -f json -r phonetic voz.wav` |
 
 Catálogos: `python -c "from studio.planner import catalog; import json; print(json.dumps(catalog(), indent=1, ensure_ascii=False))"`.
 
@@ -52,8 +56,9 @@ studio/            motor (Python): planner, characters, motion, backgrounds, eff
 web/               interfaz (HTML/CSS/JS sin build)
 templates/web/     plantillas GSAP, CSS/SVG, Lottie, kinetic type, interactiva, Three.js
 scripts/capture.mjs  captura determinista de plantillas web a MP4 (Playwright)
+scripts/blender5     Blender 5.2 (bpy de PyPI) con interfaz CLI · scripts/mocap/  captura de movimiento (MediaPipe)
 remotion/          proyecto Remotion (composiciones Historia y TituloCinetico)
-.claude/skills/    86 Skills (80 generadas desde scripts/skills/ + 6 externas, ver THIRD_PARTY_SKILLS.md)
+.claude/skills/    170 Skills (80 generadas desde scripts/skills/ + 89 externas, ver THIRD_PARTY_SKILLS.md + 1 propia de peleas)
 docs/              documentación (CLI, APIs, arquitectura)
 projects/          resultados (no se versionan)
 ```
