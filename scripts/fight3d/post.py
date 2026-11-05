@@ -201,12 +201,12 @@ def build_audio(total):
             clips.append({"audio": pitch(A.synth_sfx("ding"), 1.25), "start": to_out_time(e["frame"]), "gain": 0.8})
         elif e["kind"] == "whoosh":
             d = max(0.12, to_out_time(e["end_frame"]) - to_out_time(e["frame"]))
-            clips.append({"audio": A.synth_sfx("whoosh", d, seed=e["frame"]), "start": to_out_time(e["frame"]), "gain": 1.0})
+            clips.append({"audio": A.synth_sfx("whoosh", d, seed=e["frame"]), "start": to_out_time(e["frame"]), "gain": 0.5})
     for f, e in impacts.items():
         t = to_out_time(f)
         k = e["kind"]
         if k == "block":
-            clips += [{"audio": pitch(A.synth_sfx("punch"), 0.9), "start": t, "gain": 0.75},
+            clips += [{"audio": pitch(A.synth_sfx("punch"), 0.9), "start": t, "gain": 1.1},
                       {"audio": A.synth_sfx("footstep", seed=f), "start": t, "gain": 0.6}]
         elif k == "hit":
             clips += [{"audio": pitch(A.synth_sfx("punch"), 1.35), "start": t, "gain": 1.0},
