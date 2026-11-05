@@ -233,7 +233,7 @@ def skeleton_at(name, tau):
     r_p = f_p.cross(UP).normalized()
     f_c = rot_about(f, UP, p["twist"])
     r_c = f_c.cross(UP).normalized()
-    spine = rot_about(UP, r_c, p["lean"])          # inclinar hacia delante gira alrededor del eje derecho
+    spine = rot_about(UP, r_c, -p["lean"])         # lean > 0 = hacia delante (regla de la mano derecha sobre el eje derecho)
     spine = rot_about(spine, f_c, p["roll"]).normalized()
     r_c = f_c.cross(spine).normalized()
     f_c = spine.cross(r_c).normalized()
@@ -242,7 +242,7 @@ def skeleton_at(name, tau):
     neck = chest + spine * d["chest"]
     sh_c = neck - spine * 0.04
     shL, shR = sh_c - r_c * d["shoulder"], sh_c + r_c * d["shoulder"]
-    head_up = rot_about(spine, r_c, p["head_tilt"]).normalized()
+    head_up = rot_about(spine, r_c, -p["head_tilt"]).normalized()   # head_tilt > 0 = barbilla abajo
     look = rot_about(f_c, head_up, p["head_turn"])
     neck_top = neck + head_up * d["neck"]
     head = neck_top + head_up * d["head"]
