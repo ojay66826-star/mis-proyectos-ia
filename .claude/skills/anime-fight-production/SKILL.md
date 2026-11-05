@@ -19,6 +19,7 @@ personajes ni escenas de obras protegidas (regla del estudio).
 |---|---|---|
 | **Animatic 2D rápido** | previs, ritmo, pruebas de coreografía en minutos | `python -m studio make/render` (acciones `punch`, `kick`, `spin`, `scared_shake`; efectos `speedlines`, `energy`, `explosion`, `lightning`, `smoke`; cámara `shake`, `zoom_in`, `dolly_in`) |
 | **3D del estudio** | personaje 3D procedural + GLB en un comando | `python -m studio character3d persona --action punch --engine eevee` (Blender 4.0.2) |
+| **Escena 3D de pelea completa** (recomendada) | combate coreografiado con cel-shading, planos, cámara lenta, hit-stop, rótulos y sonido | `scripts/fight3d/` (coreografía JSON → Blender 5.2 → post): ver «Motor fight3d» abajo |
 | **3D profesional (Blender 5.2)** | personajes musculosos, rig, mocap, cel-shading, destrucción, render final | Skills `blender-*` con `BLENDER_EXE=/usr/local/bin/blender5` (módulo oficial bpy 5.2.3) |
 | **Web / tiempo real** | escenas interactivas, previs en navegador, captura a MP4 | Skills `threejs-*`, `python -m studio web`, `scripts/capture.mjs` |
 | **Títulos y montaje por código** | rótulos de ronda, nombres de técnica, créditos | `remotion-best-practices`, `python -m studio remotion`, HyperFrames (`hyperframes`) |
@@ -61,6 +62,29 @@ personajes ni escenas de obras protegidas (regla del estudio).
   `/opt/mocap-py/bin/python scripts/mocap/video_pose.py golpe.mp4 -o projects/mocap/golpe` → `pose.json` (33 puntos por
   fotograma, 2 personas) + `control.mp4`. Úsalo para timing y poses clave; para retargeting a un rig usa BVH/FBX de mocap
   con `blender-animation-api` (`retarget.py`).
+
+## Motor fight3d (escena 3D de pelea por coreografía)
+
+Ejemplo de referencia: `projects/pelea-3d-anime/coreografia.json`. La coreografía define dos luchadores (medidas,
+musculatura, colores, pelo, pantalón), claves de pose por tiempo (`root`, `pelvis_h`, `lean`, `twist`, `handL/R`,
+`footL/R` en coordenadas locales [delante, derecha, arriba] o apuntando al rival con `{"ref": "@B.head", "off": [...]}`),
+rampas de cámara lenta (`speed`), impactos (`block`, `hit`, `big`, `land`, `whiff`), barridos, campanas, rótulos y
+planos de cámara (órbita o travelling, con mirada a puntos de los luchadores). Pasos:
+
+```bash
+export BLENDER_EXE=/usr/local/bin/blender5; R="python3 .claude/skills/blender-core/scripts/run_in_blender.py"; P=projects/<escena>
+$R scripts/fight3d/fight3d.py -- $P/coreografia.json $P/escena.blend $P/eventos.json          # construir y animar
+ALL=$(python3 -c "import json;e=json.load(open('$P/eventos.json'));print(' '.join(e['fighter_meshes']+e['arena_meshes']))")
+$R --blend $P/escena.blend .claude/skills/blender-stylized-npr/scripts/toon_setup.py -- --objects $ALL --lighting scene \
+   --bands 2 --rim 0.45 --outline 0.006 --save $P/escena_toon.blend                        # UNA sola pasada de toon
+$R --blend $P/escena_toon.blend scripts/fight3d/strip_outline.py -- A_ B_                   # contorno solo en luchadores
+for o in 0 1 2; do blender5 -b $P/escena_toon.blend -P scripts/fight3d/render.py -- $P/frames 1-<N> 75 8 3 $o & done; wait
+python3 scripts/fight3d/post.py $P/frames $P/eventos.json $P                                # hit-stop, FX, rótulos, sonido → final.mp4
+```
+
+Avisos: no ejecutes `toon_setup.py` dos veces sobre el mismo archivo (reconstruye su grupo de nodos y deja a cero
+los materiales de la pasada anterior). En CPU, ≈11 s por fotograma a 960×540 con 3 procesos; el contorno casi
+duplica el coste. Prueba primero 6–8 fotogramas clave a media resolución (`render.py … 15,46,77 50 8`).
 
 ## 4. Pipeline 3D profesional (Blender 5.2)
 
