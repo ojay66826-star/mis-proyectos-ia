@@ -196,6 +196,14 @@ def cmd_sprite(a):
         print(json.dumps(dict(out=str(out), **info), indent=2, ensure_ascii=False))
 
 
+def cmd_assemble(a):
+    from .assemble import assemble
+    out = _out(a.output, "montaje.mp4")
+    res = assemble(a.clips, out, title=a.title, subtitle=a.subtitle, end_text=a.end, music=None if a.music == "none" else a.music,
+                   music_gain=a.music_gain, fade_into=[int(x) for x in a.fade_into.split(",") if x] if a.fade_into else [])
+    print(json.dumps(res, indent=2, ensure_ascii=False))
+
+
 def cmd_export(a):
     from . import exporter
     if a.preset == "capcut":
@@ -431,6 +439,17 @@ def main(argv=None):
     s.add_argument("images", nargs="+")
     s.add_argument("-o", "--output")
     s.set_defaults(fn=cmd_sprite)
+
+    s = sub.add_parser("assemble", help="montar planos ya generados (p. ej. video IA) en un corto con título, música y final")
+    s.add_argument("clips", nargs="+")
+    s.add_argument("--title")
+    s.add_argument("--subtitle")
+    s.add_argument("--end", help="texto de la cartela final")
+    s.add_argument("--music", default="happy", help="estado de ánimo de la música procedural o 'none'")
+    s.add_argument("--music-gain", type=float, default=0.18)
+    s.add_argument("--fade-into", default="", help="números de plano a los que se entra con fundido, p. ej. 9")
+    s.add_argument("-o", "--output")
+    s.set_defaults(fn=cmd_assemble)
 
     s = sub.add_parser("export", help="exportar para plataformas")
     s.add_argument("video")
