@@ -1,10 +1,21 @@
 # Estudio de Animación IA — instrucciones para Claude
 
+## ⚠️ Preferencias del usuario (obligatorias, por encima de todo lo demás)
+
+1. **Responde SIEMPRE en español**, en todos los mensajes, aunque las herramientas o los prompts técnicos estén en
+   inglés. El usuario lo ha pedido varias veces.
+2. **Calidad = película de animación 3D.** Para cortos, historias o personajes animados usa la Skill **`corto-3d-ia`**
+   (hoja de personajes → storyboard → Kling 3 Pro → `python -m studio assemble`). El motor procedural 2D y el modo
+   «sprite» los rechazó por básicos; úsalos solo si el usuario los pide expresamente o para pruebas gratis.
+3. **Antes de gastar créditos**: estima (`estimate_only`), di la cifra en créditos y US$ y espera su «sí».
+4. Reutiliza lo guardado en **`biblioteca/`**: personajes Miso y Pipa (`biblioteca/personajes/`), movimientos probados
+   (`biblioteca/movimientos_3d.json`) y el corto de referencia «Miso y la cometa perdida» (`biblioteca/cortos/`).
+
 Este repositorio es un estudio de animación y creación de contenido. Cuando el usuario pida **cualquier** animación,
 video, personaje, efecto, logo, texto animado o exportación, actúa como **director del estudio**:
 
 1. Carga la Skill `animation-workflow` (orquestador) y, según la petición, las Skills especializadas de `.claude/skills/`
-   (86 Skills: 80 propias + 6 externas revisadas — HyperFrames, Three.js, UI y Flutter; catálogo en `docs/SKILLS_CATALOGO.md`).
+   (87 Skills: 81 propias + 6 externas revisadas — HyperFrames, Three.js, UI y Flutter; catálogo en `docs/SKILLS_CATALOGO.md`).
 2. Ejecuta el trabajo tú mismo con el motor `python -m studio …` (no le pidas al usuario que programe).
 3. Itera barato: `plan` → `--storyboard-only` / `--quality preview` → revisa `storyboard.jpg` (ábrelo) → render final.
 4. Verifica con `python -m studio qc <video>` y mirando 2–3 frames reales antes de decir que está listo.
@@ -16,6 +27,7 @@ video, personaje, efecto, logo, texto animado o exportación, actúa como **dire
 | Necesidad | Comando |
 |---|---|
 | Diagnóstico de herramientas y claves | `python -m studio doctor` (`--online` para probar conectividad) |
+| **Corto 3D tipo película (preferido)** | Skill `corto-3d-ia` + `biblioteca/` (ElevenLabs: hoja → storyboard → Kling 3 Pro) → `assemble` |
 | Frase → video terminado | `python -m studio make "<idea>" [--style anime] [--format 9:16] [--3d] [--quality preview\|hd\|fullhd]` |
 | Guion editable | `python -m studio plan "<idea>" -o proyecto.json` → `python -m studio render proyecto.json` |
 | Personaje consistente | `python -m studio character <especie> --name … --color … --accessory …` |
@@ -57,7 +69,8 @@ web/               interfaz (HTML/CSS/JS sin build)
 templates/web/     plantillas GSAP, CSS/SVG, Lottie, kinetic type, interactiva, Three.js
 scripts/capture.mjs  captura determinista de plantillas web a MP4 (Playwright)
 remotion/          proyecto Remotion (composiciones Historia y TituloCinetico)
-.claude/skills/    86 Skills (80 generadas desde scripts/skills/ + 6 externas, ver THIRD_PARTY_SKILLS.md)
+.claude/skills/    87 Skills (80 generadas desde scripts/skills/ + corto-3d-ia escrita a mano + 6 externas, ver THIRD_PARTY_SKILLS.md)
+biblioteca/        personajes, movimientos 3D y cortos de referencia aprobados por el usuario (sí se versiona)
 docs/              documentación (CLI, APIs, arquitectura)
 projects/          resultados (no se versionan)
 ```

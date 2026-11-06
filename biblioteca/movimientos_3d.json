@@ -1,0 +1,87 @@
+{
+  "descripcion": "Biblioteca de movimientos/planos 3D probados con Kling 3 Pro (image-to-video desde fotograma de storyboard). Todos dieron resultado utilizable a la primera en 'Miso y la cometa perdida'. Sustituye {A}/{B} por la 'referencia_corta' de cada personaje (ver biblioteca/personajes/*/ficha.json), {LUGAR}, {OBJETO}, {FRASE_A}, {VOZ_A}, etc.",
+  "reglas": [
+    "Empieza SIEMPRE con '3D animated feature film shot' + tipo de plano.",
+    "Describe la acción como secuencia de beats (primero X, luego Y, termina en Z): Kling respeta el orden.",
+    "Repite la referencia corta del personaje (diseño + prenda distintiva) en cada prompt.",
+    "Cierra con: 'Keep the character design(s) and art style exactly as in the start frame.'",
+    "Indica el sonido explícito: 'Sound: …' y 'No music' (la música se pone en el montaje con ducking).",
+    "Diálogo en español entre comillas, con tipo de voz y 'Lips in sync with each line'. Máximo 1–2 frases cortas por plano.",
+    "Duración: 6 s para acciones simples, 7 s para gags/acción, 8 s para diálogo + movimiento de cámara."
+  ],
+  "movimientos": [
+    {
+      "id": "caminar_hacia_camara",
+      "nombre": "Pasear feliz hacia cámara (plano de apertura)",
+      "duracion": 6, "plano": "general, grúa que baja",
+      "fotograma": "wide establishing shot of {LUGAR}; {A} walks along the path in the middle distance, small in frame, whistling with eyes half closed",
+      "prompt": "3D animated feature film shot. The camera slowly cranes down from the treetops to path level. {A} walks happily along the path toward the camera with a light bouncy step, eyes half closed, whistling a cheerful tune. Birds chirp, leaves sway gently in the breeze. Keep the character design and art style exactly as in the start frame. Sound: cheerful whistling, birdsong, soft ambience. No dialogue, no music.",
+      "resultado": "ok: caminar natural; el personaje queda pequeño en cuadro (normal en plano general)"
+    },
+    {
+      "id": "oir_y_girar",
+      "nombre": "Oír algo y girar la cabeza (curiosidad)",
+      "duracion": 6, "plano": "medio, push-in suave",
+      "fotograma": "medium shot of {A} stopping mid-step and turning his head to the right, ears perked up, curious surprised expression",
+      "prompt": "3D animated feature film shot, medium shot. {A} is walking when he hears {SONIDO} off-screen to the right: he stops mid-step, his ears perk up and swivel, he turns his head toward the sound with a curious, concerned expression, then takes a hesitant step in that direction. Gentle push-in of the camera. Keep the character design and art style exactly as in the start frame. Sound: {SONIDO}, ambience. No dialogue, no music.",
+      "resultado": "ok: orejas y mirada muy expresivas"
+    },
+    {
+      "id": "triste_senalar_hablar",
+      "nombre": "Personaje triste señala arriba y dice una frase",
+      "duracion": 8, "plano": "contrapicado suave, tilt arriba y abajo",
+      "fotograma": "{B} at the foot of {LUGAR_ALTO}, teary-eyed, pointing up; {OBJETO} visible high above",
+      "prompt": "3D animated feature film shot. {B} stands under {LUGAR_ALTO}, sniffling with teary eyes. She points up at {OBJETO} high above and says in Spanish, in a {VOZ_B}: \"{FRASE_B}\" Her lips move in sync with the words, her tail droops. Slow tilt of the camera up toward {OBJETO} and back down to her. Keep the character design and art style exactly as in the start frame. Sound: her line of dialogue, leaves rustling, birdsong. No music.",
+      "resultado": "ok: diálogo + gesto + movimiento de cámara en un solo plano"
+    },
+    {
+      "id": "frase_y_salto_fallido",
+      "nombre": "Gag: frase valiente + salto que no llega + caída de culo",
+      "duracion": 7, "plano": "medio, cómico",
+      "fotograma": "{A} with chest puffed out, fists on hips, crouching to jump, looking up with determination; {B} beside him, hopeful",
+      "prompt": "3D animated feature film shot, comedic. {A} puffs out his chest and says in Spanish, in a {VOZ_A}: \"{FRASE_A}\" Then he crouches and jumps as high as he can toward {OBJETIVO}, but only reaches halfway, flails in the air and lands on his bottom with a soft thump, looking embarrassed. {B} watches hopefully and then blinks in surprise. Keep the character designs and art style exactly as in the start frame. Sound: his line of dialogue, a springy jump, a soft comedic thump. No music.",
+      "resultado": "ok, con variación: Kling hizo que trepara el tronco un momento antes de caer; el gag se entiende"
+    },
+    {
+      "id": "trepar_rama_tension",
+      "nombre": "Avanzar por una rama que se dobla (tensión)",
+      "duracion": 7, "plano": "contrapicado dramático, deriva lenta",
+      "fotograma": "dramatic low-angle shot; {A} crawls along a thin branch high up, nervous face, branch bending; {OBJETO} further along",
+      "prompt": "3D animated feature film shot, low angle, tense. {A} crawls slowly along a thin branch high up toward {OBJETO}. The branch creaks and bends under his weight, he freezes, gulps, wobbles, then carefully keeps going, claws gripping the bark, tail stiff. Slow camera drift following him. Keep the character design and art style exactly as in the start frame. Sound: wood creaking, leaves rustling, a nervous gulp. No dialogue, no music.",
+      "resultado": "ok: muy buena tensión y expresión"
+    },
+    {
+      "id": "viento_lo_levanta",
+      "nombre": "Agarra el objeto y una ráfaga lo levanta (queda colgando)",
+      "duracion": 6, "plano": "primer plano",
+      "fotograma": "close-up of {A} triumphantly grabbing {OBJETO}, leaves starting to whip in the wind",
+      "prompt": "3D animated feature film shot, close-up. {A} grins triumphantly holding {OBJETO}. Suddenly a strong gust of wind fills it, it yanks upward and lifts {A} off the branch: he dangles in the air holding on, legs kicking, eyes wide in surprise. Leaves whirl around him. Keep the character design and art style exactly as in the start frame. Sound: a strong whoosh of wind, fluttering, a surprised yelp. No dialogue, no music.",
+      "resultado": "ok: física del viento creíble"
+    },
+    {
+      "id": "caida_camara_lenta_hojas",
+      "nombre": "Caída en cámara lenta sobre un montón de hojas (gag)",
+      "duracion": 7, "plano": "cámara lenta, cómico",
+      "fotograma": "{A} falling mid-air, limbs spread, shocked comic face, just above a big pile of autumn leaves; {OBJETO} floating above",
+      "prompt": "3D animated feature film shot, slow motion, comedic. {A} falls in slow motion with arms and legs spread and a shocked face, and plops into the big pile of autumn leaves, which bursts up in a cloud of leaves. A beat later {OBJETO} floats gently down and lands right on top of his head. He pops his head out of the leaves, dazed, blinking. Keep the character design and art style exactly as in the start frame. Sound: slowed-down whoosh, a soft crunchy leaf impact, rustling leaves settling. No dialogue, no music.",
+      "resultado": "parcial: la caída y la explosión de hojas salen muy bien, pero no siempre asoma la cabeza al final (queda enterrado). Si es importante, pedirlo en un plano aparte."
+    },
+    {
+      "id": "entregar_objeto_dialogo",
+      "nombre": "Entregar un objeto con diálogo a dos (plano/contraplano en uno)",
+      "duracion": 7, "plano": "plano medio a dos",
+      "fotograma": "two-shot; {A} sitting, smiling proudly, holding out {OBJETO} toward {B}, who giggles with a paw over her mouth",
+      "prompt": "3D animated feature film shot, two-shot. {B} giggles with a paw over her mouth. {A} holds out {OBJETO} and says proudly in Spanish, in a {VOZ_A}: \"{FRASE_A}\" {B} takes it, hugs it, and answers happily in Spanish, in a {VOZ_B}: \"{FRASE_B}\" Both smile. Lips in sync with each line. Keep the character designs and art style exactly as in the start frame. Sound: the two lines of dialogue, a soft giggle, ambience. No music.",
+      "resultado": "ok: dos frases y entrega del objeto en 7 s"
+    },
+    {
+      "id": "final_atardecer_grua_cielo",
+      "nombre": "Final feliz al atardecer, la cámara sube al cielo",
+      "duracion": 6, "plano": "general, golden hour, grúa/tilt arriba",
+      "fotograma": "wide golden-hour sunset shot; {A} and {B} side by side seen slightly from behind, laughing, {OBJETO} high in the sky",
+      "prompt": "3D animated feature film shot, golden-hour sunset. {A} and {B} stand together on {LUGAR}, laughing and looking up at {OBJETO} high in the warm sky. The camera slowly rises and tilts up toward the sky. Keep the character designs and art style exactly as in the start frame. Sound: gentle wind, soft happy laughter. No dialogue, no music.",
+      "resultado": "ok: cierre perfecto para fundido a 'Fin'"
+    }
+  ],
+  "plantilla_fotograma": "Use the reference only as the character model sheet. Create a new cinematic 16:9 film frame in exactly the same 3D animated feature-film style: <fotograma del movimiento>. <Personaje> (<referencia_corta>, identical design to the reference) … <Si un personaje NO sale: 'X is NOT in this shot.'> No text."
+}

@@ -1,0 +1,21 @@
+{
+  "title": "Miso y la cometa perdida",
+  "format": "16:9",
+  "model_video": "kling-3-pro",
+  "style": "3D animated feature film, stylized CGI, soft global illumination, warm palette, shallow depth of field",
+  "characters": {
+    "miso": "young orange tabby cat walking upright, emerald-green eyes, teal neckerchief, cheerful child voice",
+    "pipa": "small red squirrel girl, half Miso's height, big dark eyes, yellow flower behind ear, sweet little girl voice"
+  },
+  "shots": [
+    {"n": 1, "dur": 6, "shot": "wide establishing, camera cranes down from the sky", "action": "Sunny morning in a lush park with a big oak tree. Miso walks happily along the path, whistling.", "dialogue": null},
+    {"n": 2, "dur": 6, "shot": "medium shot", "action": "Miso hears soft crying, stops and turns his head, curious, ears perked up.", "dialogue": null},
+    {"n": 3, "dur": 8, "shot": "shot / reverse shot", "action": "Under the oak, Pipa points up at her red kite tangled in the high branches, teary-eyed.", "dialogue": [["pipa", "¡Mi cometa se quedó atrapada!"]]},
+    {"n": 4, "dur": 7, "shot": "medium, comedic", "action": "Miso puffs his chest and jumps as high as he can, but barely reaches halfway up the trunk and lands on his bottom.", "dialogue": [["miso", "¡Yo te ayudo!"]]},
+    {"n": 5, "dur": 7, "shot": "low-angle, tension", "action": "Miso climbs the trunk and crawls along a branch that bends dangerously under his weight.", "dialogue": null},
+    {"n": 6, "dur": 6, "shot": "close-up", "action": "Miso grabs the kite; a gust of wind lifts it and Miso dangles from the kite string, legs kicking.", "dialogue": null},
+    {"n": 7, "dur": 7, "shot": "slow motion, comedic", "action": "Miso falls into a big pile of autumn leaves; the kite gently lands on top of his head.", "dialogue": null},
+    {"n": 8, "dur": 7, "shot": "shot / reverse shot", "action": "Pipa giggles; Miso, covered in leaves, hands her the kite with a proud smile.", "dialogue": [["miso", "¡Aquí tienes!"], ["pipa", "¡Gracias, Miso!"]]},
+    {"n": 9, "dur": 6, "shot": "wide, golden-hour sunset, camera rises to the sky", "action": "Miso and Pipa fly the red kite together on a hill, laughing.", "dialogue": null}
+  ]
+}

@@ -1,0 +1,83 @@
+{
+ "elevenlabs_flow": "udAFaWs91aUY7x3f3jX0",
+ "hoja_personajes_generation_id": "C4uTIhXNPkHeYERexjs0",
+ "modelos": {
+  "fotogramas": "gpt-image-2.5-sunburst (creative_edit_image, connect_from=hoja, 1 variante)",
+  "video": "kling-3-pro (start_frame=fotograma, 16:9, 1080p, generate_audio=true)"
+ },
+ "montaje": "python -m studio assemble planos/p{1..9}.mp4 --title \"Miso y la cometa perdida\" --end \"Fin\" --music happy --music-gain 0.16 --fade-into 9 -o miso_y_la_cometa.mp4",
+ "planos": [
+  {
+   "n": 1,
+   "duracion": 6,
+   "fotograma_prompt": "Use the reference only as the character model sheet. Create a new cinematic 16:9 film frame in exactly the same 3D animated feature-film style: wide establishing shot of a lush sunny park on a fresh morning, a winding path, flower beds, and a big old oak tree on the right side of the frame. Miso (the orange tabby cat with the teal neckerchief, identical design to the reference) walks happily along the path in the middle distance, small in frame, whistling with eyes half closed. Pipa is NOT in this shot. Warm morning sunlight, soft haze, shallow depth of field. No text.",
+   "fotograma_generation_id": "DVn1mF6Ci2g2uxZvNbkW",
+   "video_prompt": "3D animated feature film shot. The camera slowly cranes down from the treetops to path level. Miso, the orange tabby cat with the teal neckerchief, walks happily along the park path toward the camera with a light bouncy step, eyes half closed, whistling a cheerful tune. Birds chirp, leaves sway gently in the morning breeze. Keep the character design and art style exactly as in the start frame. Sound: cheerful whistling, birdsong, soft park ambience. No dialogue, no music.",
+   "video_generation_id": "HLGIrzkFzLzoXGv1Dx7r"
+  },
+  {
+   "n": 2,
+   "duracion": 6,
+   "fotograma_prompt": "Use the reference only as the character model sheet. Create a new cinematic 16:9 film frame in exactly the same 3D animated feature-film style: medium shot of Miso (the orange tabby cat with the teal neckerchief, identical design to the reference) on a sunny park path, stopping mid-step and turning his head to the right, ears perked up, curious surprised expression, as if he just heard someone crying off-screen. Blurred green park background with bokeh. Pipa is NOT in this shot. No text.",
+   "fotograma_generation_id": "TG74tn3KWrARregMvw1O",
+   "video_prompt": "3D animated feature film shot, medium shot. Miso, the orange tabby cat with the teal neckerchief, is walking along the park path when he hears soft crying off-screen to the right: he stops mid-step, his ears perk up and swivel, he turns his head toward the sound with a curious, concerned expression, then takes a hesitant step in that direction. Gentle push-in of the camera. Keep the character design and art style exactly as in the start frame. Sound: soft distant sobbing of a little girl, birdsong, park ambience. No dialogue, no music.",
+   "video_generation_id": "BnFlt2j6msDbp6ydSOp1"
+  },
+  {
+   "n": 3,
+   "duracion": 8,
+   "fotograma_prompt": "Use the reference only as the character model sheet. Create a new cinematic 16:9 film frame in exactly the same 3D animated feature-film style: Pipa (the small red squirrel girl with the yellow flower behind her ear, identical design to the reference, but WITHOUT the kite in her hands) stands at the foot of a big old oak tree in a sunny park, teary-eyed and sad, pointing up with one paw. High above in the oak branches, her small red diamond kite with its ribbon tail is tangled. Slightly low camera angle so both Pipa and the kite in the branches are visible. No text.",
+   "fotograma_generation_id": "fngbJG7g2GntSJSgLXPm",
+   "video_prompt": "3D animated feature film shot. Pipa, the small red squirrel girl with a yellow flower behind her ear, stands under the big oak tree, sniffling with teary eyes. She points up at her red kite tangled high in the branches and says in Spanish, in a sweet, sad little girl's voice: \"¡Mi cometa se quedó atrapada!\" Her lips move in sync with the words, her big tail droops. Slow tilt of the camera up toward the kite in the branches and back down to her. Keep the character design and art style exactly as in the start frame. Sound: her line of dialogue, leaves rustling, birdsong. No music.",
+   "video_generation_id": "8X78UhVmSlwNGI4KOE69"
+  },
+  {
+   "n": 4,
+   "duracion": 7,
+   "fotograma_prompt": "Use the reference only as the character model sheet. Create a new cinematic 16:9 film frame in exactly the same 3D animated feature-film style: medium shot at the foot of a big old oak tree in a sunny park. Miso (the orange tabby cat with the teal neckerchief, identical design) stands confidently with his chest puffed out and fists on his hips, crouching slightly as if about to jump, looking up at the tree with determination. Pipa (the small red squirrel girl with the yellow flower, identical design, no kite in her hands) stands beside him, hopeful, paws clasped. No text.",
+   "fotograma_generation_id": "RZyuQvem6Ab2DRdG4T4q",
+   "video_prompt": "3D animated feature film shot, comedic. Miso, the orange tabby cat with the teal neckerchief, puffs out his chest and says in Spanish, in a cheerful, confident boy's voice: \"¡Yo te ayudo!\" Then he crouches and jumps as high as he can toward the tree, but only reaches halfway up the trunk, flails in the air and lands on his bottom with a soft thump, looking embarrassed. Pipa, the small red squirrel girl, watches hopefully and then blinks in surprise. Keep the character designs and art style exactly as in the start frame. Sound: his line of dialogue, a springy jump, a soft comedic thump. No music.",
+   "video_generation_id": "f5zVoqYfQ89sOPSlVIYC"
+  },
+  {
+   "n": 5,
+   "duracion": 7,
+   "fotograma_prompt": "Use the reference only as the character model sheet. Create a new cinematic 16:9 film frame in exactly the same 3D animated feature-film style: dramatic low-angle shot looking up into a big old oak tree. Miso (the orange tabby cat with the teal neckerchief, identical design) crawls carefully along a thin branch high up, claws gripping, tail stiff, nervous face, the branch bending under his weight. Further along the branch, the small red diamond kite with ribbon tail is tangled in leaves. Sunlight shining through the leaves, blue sky. No text.",
+   "fotograma_generation_id": "mbdXDskcP7b7NzibLneH",
+   "video_prompt": "3D animated feature film shot, low angle, tense. Miso, the orange tabby cat with the teal neckerchief, crawls slowly along a thin oak branch high up toward the red kite tangled in the leaves. The branch creaks and bends under his weight, he freezes, gulps, wobbles, then carefully keeps going, claws gripping the bark, tail stiff. Slow camera drift following him. Keep the character design and art style exactly as in the start frame. Sound: wood creaking, leaves rustling, a nervous gulp. No dialogue, no music.",
+   "video_generation_id": "HOPpfsm37CKdh0gbF6z0"
+  },
+  {
+   "n": 6,
+   "duracion": 6,
+   "fotograma_prompt": "Use the reference only as the character model sheet. Create a new cinematic 16:9 film frame in exactly the same 3D animated feature-film style: close-up up in the oak tree branches. Miso (the orange tabby cat with the teal neckerchief, identical design) has just grabbed the small red diamond kite with both paws, triumphant grin, while the leaves around him start to whip in a strong gust of wind and the kite begins to pull upward. Bright sky behind, sunlight through leaves. No text.",
+   "fotograma_generation_id": "1pwf8tpflfqUY0OXDVox",
+   "video_prompt": "3D animated feature film shot, close-up. Miso, the orange tabby cat with the teal neckerchief, grins triumphantly holding the red kite in the oak branches. Suddenly a strong gust of wind fills the kite, which yanks upward and lifts Miso off the branch: he dangles in the air holding the kite, legs kicking, eyes wide in surprise. Leaves whirl around him. Keep the character design and art style exactly as in the start frame. Sound: a strong whoosh of wind, fluttering kite, a surprised cat yelp. No dialogue, no music.",
+   "video_generation_id": "a9KpWsWkQiczdKjbzrxx"
+  },
+  {
+   "n": 7,
+   "duracion": 7,
+   "fotograma_prompt": "Use the reference only as the character model sheet. Create a new cinematic 16:9 film frame in exactly the same 3D animated feature-film style: Miso (the orange tabby cat with the teal neckerchief, identical design) falling through the air in mid-fall, arms and legs spread out, eyes wide and mouth open in a comic shocked expression, just above a big soft pile of orange and yellow autumn leaves on the grass under the oak tree. The small red diamond kite floats gently above him. Slight motion blur on falling leaves. No text.",
+   "fotograma_generation_id": "qzafL796fOTYMmLuCVnU",
+   "video_prompt": "3D animated feature film shot, slow motion, comedic. Miso, the orange tabby cat with the teal neckerchief, falls in slow motion with arms and legs spread and a shocked face, and plops into the big pile of autumn leaves, which bursts up in a cloud of leaves. A beat later the red kite floats gently down and lands right on top of his head. He pops his head out of the leaves, dazed, blinking. Keep the character design and art style exactly as in the start frame. Sound: slowed-down whoosh, a soft crunchy leaf impact, rustling leaves settling. No dialogue, no music.",
+   "video_generation_id": "phWEe78cxZcLKnFJ0i9y"
+  },
+  {
+   "n": 8,
+   "duracion": 7,
+   "fotograma_prompt": "Use the reference only as the character model sheet. Create a new cinematic 16:9 film frame in exactly the same 3D animated feature-film style: medium two-shot under the oak tree in a sunny park. Miso (the orange tabby cat with the teal neckerchief, identical design) sits in a pile of autumn leaves, with a few leaves stuck on his head and ears, smiling proudly and holding out the small red diamond kite towards Pipa. Pipa (the small red squirrel girl with the yellow flower, identical design) stands in front of him, giggling happily with a paw over her mouth. No text.",
+   "fotograma_generation_id": "wz8AagadeiXDvJDdQcME",
+   "video_prompt": "3D animated feature film shot, two-shot. Pipa, the small red squirrel girl with the yellow flower, giggles with a paw over her mouth. Miso, the orange tabby cat with the teal neckerchief, sitting in the leaf pile with leaves on his head, holds out the red kite and says proudly in Spanish, in a cheerful boy's voice: \"¡Aquí tienes!\" Pipa takes the kite, hugs it, and answers happily in Spanish, in a sweet little girl's voice: \"¡Gracias, Miso!\" Both smile. Lips in sync with each line. Keep the character designs and art style exactly as in the start frame. Sound: the two lines of dialogue, a soft giggle, rustling leaves. No music.",
+   "video_generation_id": "HnPuecktqKd5kTz40joo"
+  },
+  {
+   "n": 9,
+   "duracion": 6,
+   "fotograma_prompt": "Use the reference only as the character model sheet. Create a new cinematic 16:9 film frame in exactly the same 3D animated feature-film style: wide shot at golden-hour sunset on a grassy hill in the park, warm orange and pink sky. Miso (the orange tabby cat with the teal neckerchief, identical design) and Pipa (the small red squirrel girl with the yellow flower, identical design) stand side by side, seen slightly from behind and to the side, laughing, both holding the string of the small red diamond kite flying high in the sky. Lens flare from the setting sun. No text.",
+   "fotograma_generation_id": "3rbze5VhFm4foOev1dP2",
+   "video_prompt": "3D animated feature film shot, golden-hour sunset. Miso, the orange tabby cat with the teal neckerchief, and Pipa, the small red squirrel girl with the yellow flower, stand together on the grassy hill, both holding the kite string, laughing and looking up as the red kite dances high in the warm sky. The camera slowly rises and tilts up toward the kite and the glowing sky. Keep the character designs and art style exactly as in the start frame. Sound: gentle wind, fluttering kite, soft happy laughter. No dialogue, no music.",
+   "video_generation_id": "FejFirkh9x4ILNH2jl7w"
+  }
+ ]
+}
