@@ -1,6 +1,6 @@
 # Catálogo de Skills por categoría
 
-86 Skills en `.claude/skills/`: 80 propias del estudio (generadas desde `scripts/skills/`) + 6 externas revisadas
+87 Skills en `.claude/skills/`: 80 propias del estudio (generadas desde `scripts/skills/`) + `corto-3d-ia` (método preferido, escrita a mano) + 6 externas revisadas
 (ver `.claude/skills/THIRD_PARTY_SKILLS.md`). Cada Skill aparece en una sola categoría (la principal).
 Verificación: `python -m studio check-skills`.
 

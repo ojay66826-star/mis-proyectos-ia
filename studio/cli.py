@@ -179,6 +179,31 @@ def cmd_remotion(a):
     print(render_story(spec, out))
 
 
+def cmd_sprite(a):
+    """Prepara arte ilustrado (IA o a mano) para animarlo: recorte de fondo y variantes de cara."""
+    from . import sprites
+    if a.op == "cutout":
+        for src in a.images:
+            out = Path(a.output) if a.output and len(a.images) == 1 else Path(src).with_name(Path(src).stem + "_cut.png")
+            im = sprites.cutout(src, out)
+            print(f"{out}  {im.size[0]}x{im.size[1]}")
+    elif a.op == "patch":
+        base, cands = a.images[0], a.images[1:]
+        if not cands:
+            raise SystemExit("patch necesita: base.png variante1.png [variante2.png …]")
+        out = _out(a.output, Path(base).stem + "_variante.png")
+        _, info = sprites.face_patch(base, cands, out)
+        print(json.dumps(dict(out=str(out), **info), indent=2, ensure_ascii=False))
+
+
+def cmd_assemble(a):
+    from .assemble import assemble
+    out = _out(a.output, "montaje.mp4")
+    res = assemble(a.clips, out, title=a.title, subtitle=a.subtitle, end_text=a.end, music=None if a.music == "none" else a.music,
+                   music_gain=a.music_gain, fade_into=[int(x) for x in a.fade_into.split(",") if x] if a.fade_into else [])
+    print(json.dumps(res, indent=2, ensure_ascii=False))
+
+
 def cmd_export(a):
     from . import exporter
     if a.preset == "capcut":
@@ -408,6 +433,23 @@ def main(argv=None):
     s.add_argument("--format")
     s.add_argument("-o", "--output")
     s.set_defaults(fn=cmd_remotion)
+
+    s = sub.add_parser("sprite", help="modo híbrido: recortar personajes IA y crear variantes de boca/ojos/expresión")
+    s.add_argument("op", choices=["cutout", "patch"], help="cutout: quitar fondo liso · patch: base + candidatas → variante alineada")
+    s.add_argument("images", nargs="+")
+    s.add_argument("-o", "--output")
+    s.set_defaults(fn=cmd_sprite)
+
+    s = sub.add_parser("assemble", help="montar planos ya generados (p. ej. video IA) en un corto con título, música y final")
+    s.add_argument("clips", nargs="+")
+    s.add_argument("--title")
+    s.add_argument("--subtitle")
+    s.add_argument("--end", help="texto de la cartela final")
+    s.add_argument("--music", default="happy", help="estado de ánimo de la música procedural o 'none'")
+    s.add_argument("--music-gain", type=float, default=0.18)
+    s.add_argument("--fade-into", default="", help="números de plano a los que se entra con fundido, p. ej. 9")
+    s.add_argument("-o", "--output")
+    s.set_defaults(fn=cmd_assemble)
 
     s = sub.add_parser("export", help="exportar para plataformas")
     s.add_argument("video")

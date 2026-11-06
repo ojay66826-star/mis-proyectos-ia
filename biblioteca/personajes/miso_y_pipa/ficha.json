@@ -1,0 +1,29 @@
+{
+  "nombre": "Miso y Pipa",
+  "estilo": "Película de animación 3D (CGI estilizado, iluminación global suave, pelaje con subsurface scattering, paleta cálida, poca profundidad de campo)",
+  "hoja_local": "hoja_personajes.jpg",
+  "elevenlabs": {
+    "nota": "Las imágenes viven en el historial de ElevenLabs del usuario. Para reutilizar la hoja como referencia SIN subir nada: creative_add_flow_asset_node(modality='image', generation_id=...) en el flujo nuevo y pasar el node_id devuelto como connect_from a creative_edit_image.",
+    "modelo_hoja": "gpt-image-2.5-sunburst",
+    "hoja_personajes_generation_id": "C4uTIhXNPkHeYERexjs0",
+    "flujo_original": "udAFaWs91aUY7x3f3jX0"
+  },
+  "personajes": {
+    "miso": {
+      "nombre": "Miso",
+      "descripcion_prompt": "MISO, an original young orange tabby cat who walks upright. Fluffy orange fur with darker orange stripes on the head, back and legs, cream-white muzzle, chest and belly, big expressive emerald-green eyes, pink nose, slightly oversized triangular ears with pink insides, a teal-green neckerchief tied at the front, no shoes, long striped tail. Child-like proportions: large head, short body.",
+      "referencia_corta": "Miso, the orange tabby cat with the teal neckerchief",
+      "voz": "chico alegre y seguro (Kling: \"cheerful, confident boy's voice\")",
+      "personalidad": "valiente, servicial, un poco presumido; gags de exceso de confianza"
+    },
+    "pipa": {
+      "nombre": "Pipa",
+      "descripcion_prompt": "PIPA, an original small young red squirrel girl, about half Miso's height. Reddish-brown fur, cream belly, big round dark-brown eyes with bright highlights, tiny tufts on the ears, a huge fluffy curled tail, a small yellow flower tucked behind one ear.",
+      "referencia_corta": "Pipa, the small red squirrel girl with the yellow flower",
+      "voz": "niña dulce (Kling: \"sweet little girl's voice\")",
+      "personalidad": "tímida, cariñosa, ríe con facilidad",
+      "objeto": "cometa roja en forma de rombo con cola de cintas rojas y amarillas"
+    }
+  },
+  "prompt_hoja_completo": "Character model sheet for a 3D animated feature film, stylized CGI with soft global illumination and subsurface-scattered fur, rendered like a frame from a modern animated movie. Plain light warm-grey studio background, soft key light from the upper left, no text, no labels.\n\nLeft: <descripcion_prompt de Miso> standing full body facing the camera in a relaxed friendly pose.\n\nRight: <descripcion_prompt de Pipa> standing full body facing the camera, smiling shyly, holding the string of a small red diamond-shaped kite with a short ribbon tail.\n\nBoth characters fully visible with space around them, same lighting and the same art style."
+}

@@ -46,7 +46,11 @@ def prepare(spec: dict, out: Path, cb=None) -> dict:
     chars = {c["id"]: c for c in spec["characters"]}
     for i, c in enumerate(spec["characters"]):
         _log(cb, "personajes", i / max(1, len(chars)), f"hoja de {c['name']}")
-        character_sheet(c, char_style(style), out / "characters" / f"{c['id']}_sheet.png")
+        if c.get("sprite"):
+            from .sprites import sprite_set
+            sprite_set(c["sprite"], spec.get("assets_dir")).base.save(out / "characters" / f"{c['id']}_sprite.png")
+        else:
+            character_sheet(c, char_style(style), out / "characters" / f"{c['id']}_sheet.png")
     fps = int(spec["fps"])
     # voces y lip-sync
     lines = []
@@ -96,10 +100,29 @@ class SceneRenderer:
         self.hold = 2 if self.style in ("clay", "stopmotion", "paper") else 1
 
     def bg(self, s):
+        if s.get("background_image"):
+            k = ("img", s["background_image"])
+            if k not in self._bg:
+                from .sprites import ImageBackground
+                p = Path(s["background_image"])
+                if not p.exists() and self.spec.get("assets_dir"):
+                    p = Path(self.spec["assets_dir"]) / p
+                self._bg[k] = ImageBackground(p, self.W, self.H, seed=s.get("id", 0), time_of_day=s["time_of_day"])
+            return self._bg[k]
         k = (s["background"], s["time_of_day"])
         if k not in self._bg:
             self._bg[k] = build_background(s["background"], self.W, self.H, s["time_of_day"], self.style, seed=k[0])
         return self._bg[k]
+
+    def speaker_weight(self, s, lt):
+        """(id del que habla, 0..1) con rampas suaves para el encuadre automático."""
+        best, w = None, 0.0
+        for d in s["dialogue"]:
+            a, b = d["start"], d["start"] + d["duration"]
+            k = clamp(min((lt - a + 0.35) / 0.5, (b + 0.6 - lt) / 0.5))
+            if k > w:
+                best, w = d["character"], k
+        return best, ease_in_out(w)
 
     def camera(self, s, lt):
         cam = s["camera"].get("type", "static")
@@ -115,6 +138,9 @@ class SceneRenderer:
             zoom = 1.15 - 0.15 * k
         elif cam == "dolly_in":
             zoom = 1.0 + 0.28 * k
+        elif cam == "speaker":  # se acerca a quien habla (plano/contraplano)
+            who, w = self.speaker_weight(s, lt)
+            zoom = 1.0 + 0.04 * k + 0.16 * w
         elif cam == "shake":
             r = np.random.default_rng(int(lt * 60))
             amp = self.H * 0.008
@@ -128,7 +154,9 @@ class SceneRenderer:
             q = 1.0 / 12
             lt = math.floor(lt / q) * q
         cam_x, zoom, sx, sy = self.camera(s, lt)
-        img = self.bg(s).render(cam_x, lt).convert("RGBA")
+        bgo = self.bg(s)
+        img = bgo.render(cam_x, lt).convert("RGBA")
+        positions = {}
         n_act = max(1, len(s["actors"]))
         base_h = min(W, H) * (0.46 if n_act <= 2 else 0.38)
         if W < H:
@@ -164,6 +192,25 @@ class SceneRenderer:
                 if abs(dt) < 0.3:
                     scale *= 1 + 0.25 * (1 - abs(dt) / 0.3)
             pose.tilt += jr
+            positions[a["character"]] = (x, y)
+            if spec.get("sprite"):
+                from .sprites import animate_sprite, contact_shadow, sprite_set
+                dt = 1 / 24
+                x0, _ = actor_position(a, lt - dt, s["duration"])
+                x2, _ = actor_position(a, lt + dt, s["duration"])
+                vel = (x2 - x0) / (2 * dt)
+                acc = (x2 - 2 * x + x0) / (dt * dt)
+                sh_h = int(base_h * scale * spec.get("height", 1.0) * 1.25)
+                cim, (ax, ay) = animate_sprite(sprite_set(spec["sprite"], self.spec.get("assets_dir")), pose, act, lt, sh_h,
+                                               velocity=vel, accel=acc, tint=getattr(bgo, "ambient", None))
+                px = x * W - cam_x * 0.2 * W + jx
+                py = y * H + jy
+                sh = contact_shadow(int(sh_h * 0.45), pose.body_dy)
+                img.alpha_composite(sh, (int(px - sh.width / 2), int(py - sh.height / 2)))
+                img.alpha_composite(cim, (int(px - ax), int(py - ay)))
+                anchors[a["character"]] = (px, py - sh_h * 0.5)
+                positions[a["character"]] = (x, y, (py - sh_h * 1.02) / H, sh_h / H)  # cabeza en reposo (no sigue saltos)
+                continue
             cim, (ax, ay) = render_character(spec, pose, int(base_h * scale), self.cstyle)
             px = x * W - cam_x * 0.2 * W + jx
             py = y * H + jy
@@ -184,9 +231,20 @@ class SceneRenderer:
                     img.alpha_composite(fl.filter(ImageFilter.GaussianBlur(base_h * 0.08)))
         if s["effects"]:
             img.alpha_composite(render_effects((W, H), s["effects"], lt, anchors, s["duration"]))
+        if s.get("background_image") and s.get("lighting", True):
+            from .sprites import lighting_overlay
+            img.alpha_composite(lighting_overlay(W, H, s["time_of_day"], lt))
         if zoom != 1.0 or sx or sy:
             cw, ch = W / zoom, H / zoom
             focus = s["camera"].get("focus", [0.5, 0.55])
+            if s["camera"].get("type") == "speaker":
+                who, w = self.speaker_weight(s, lt)
+                if who in positions:
+                    tx, ty = positions[who][:2]
+                    # encuadre: la cabeza en el tercio superior del plano
+                    top = positions[who][2] if len(positions[who]) > 2 else ty - 0.45
+                    fy = top + ch / H * 0.38
+                    focus = [focus[0] + (clamp(tx, 0.3, 0.7) - focus[0]) * w, focus[1] + (fy - focus[1]) * w]
             cx = clamp(focus[0] * W + sx, cw / 2, W - cw / 2)
             cy = clamp(focus[1] * H + sy, ch / 2, H - ch / 2)
             img = img.resize((W, H), Image.BICUBIC, box=(cx - cw / 2, cy - ch / 2, cx + cw / 2, cy + ch / 2))

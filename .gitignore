@@ -21,3 +21,6 @@ venv/
 # Sistema
 .DS_Store
 *.log
+
+# Modelos descargados (voces Piper, etc.)
+models/

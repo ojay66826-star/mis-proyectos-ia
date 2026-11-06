@@ -1,8 +1,10 @@
 """Audio: voces (TTS), música procedural, efectos de sonido, mezcla y lip-sync."""
 from __future__ import annotations
 
+import json
 import math
 import subprocess
+import sys
 import wave
 from pathlib import Path
 
@@ -97,6 +99,13 @@ def tts(text: str, out_path, voice: dict | None = None, provider: str = "auto") 
             if provider != "auto":
                 raise
             print(f"[tts] proveedor en la nube falló ({e}); uso espeak-ng")
+    if provider in ("auto", "piper") and piper_available():
+        try:
+            return tts_piper(text, out_path, voice)
+        except Exception as e:  # noqa: BLE001
+            if provider == "piper":
+                raise
+            print(f"[tts] piper falló ({e}); uso espeak-ng")
     exe = which("espeak-ng") or which("espeak")
     if not exe:
         # sin TTS: silencio con la duración estimada (para que el resto funcione)
@@ -112,6 +121,74 @@ def tts(text: str, out_path, voice: dict | None = None, provider: str = "auto") 
     # suavizado ligero del timbre robótico (eco corto de sala)
     data = data * 0.9 + np.roll(data, int(SR * 0.012), axis=0) * 0.1
     write_wav(out_path, data)
+    return out_path
+
+
+# --------------------------------------------------------------------- Piper (voz neuronal local)
+PIPER_DIR = Path(__file__).resolve().parent.parent / "models" / "piper"
+# voz femenina/aguda, masculina/grave y narrador (descarga: scripts/download_voices.sh)
+PIPER_VOICES = {"female": ("es_MX-claude-high", 0), "male": ("es_MX-ald-medium", 0),
+                "narrator": ("es_ES-davefx-medium", 0), "female2": ("es_ES-sharvard-medium", 1),
+                "male2": ("es_ES-sharvard-medium", 0)}
+
+
+def piper_available() -> bool:
+    try:
+        import piper  # noqa: F401
+    except ImportError:
+        return False
+    return any(PIPER_DIR.glob("*.onnx"))
+
+
+def _piper_model(voice: dict):
+    """Elige modelo/hablante a partir del preset estilo espeak (voz +fN = femenina, tono, etc.)."""
+    if voice.get("piper"):
+        name, spk = (voice["piper"], voice.get("speaker", 0)) if isinstance(voice["piper"], str) else voice["piper"]
+    else:
+        v = voice.get("voice", "")
+        pitch = voice.get("pitch", 50)
+        if "whisper" in v or "croak" in v:
+            key = "male2"
+        elif "+f" in v or pitch >= 72:
+            key = "female" if pitch < 82 else "female2"
+        elif pitch <= 46:
+            key = "narrator"
+        else:
+            key = "male"
+        name, spk = PIPER_VOICES[key]
+    path = PIPER_DIR / f"{name}.onnx"
+    if not path.exists():
+        path = next(iter(sorted(PIPER_DIR.glob("*.onnx"))))
+        spk = 0
+    return path, spk
+
+
+def tts_piper(text: str, out_path, voice: dict) -> Path:
+    """Voz natural local con Piper; el tono del preset se aplica como desplazamiento de semitonos."""
+    out_path = Path(out_path)
+    model, spk = _piper_model(voice)
+    raw = out_path.with_suffix(".piper.wav")
+    length = 160 / max(90, voice.get("speed", 160))
+    cmd = [sys.executable, "-m", "piper", "-m", str(model), "-f", str(raw), "-s", str(spk),
+           "--length-scale", f"{length:.3f}", "--", text]
+    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    # tono: el modelo ya es femenino/masculino; solo se ajusta lo que se sale del rango típico
+    pitch = voice.get("pitch", 50)
+    female = "+f" in voice.get("voice", "") or pitch >= 72
+    semis = voice.get("semitones")
+    if semis is None:
+        semis = (pitch - (76 if female else 52)) / 7.0
+        if "croak" in voice.get("voice", ""):
+            semis -= 3
+    semis = max(-6.0, min(6.0, semis))
+    f = 2 ** (semis / 12)
+    af = f"asetrate={{sr}}*{f:.4f},aresample={SR},atempo={1 / f:.4f}" if abs(semis) > 0.3 else f"aresample={SR}"
+    sr_in = json.loads(Path(str(model) + ".json").read_text(encoding="utf-8"))["audio"]["sample_rate"]
+    af = af.replace("{sr}", str(sr_in))
+    if "whisper" in voice.get("voice", ""):
+        af += ",highpass=f=300,aecho=0.6:0.5:60:0.3"
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(raw), "-af", af, "-ac", "2", str(out_path)], check=True)
+    raw.unlink(missing_ok=True)
     return out_path
 
 
