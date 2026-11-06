@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Datos curiosos 3D</title>
+<!-- Video «5 datos curiosos» en 3D: escenas Three.js + capa de edición (subtítulos, stickers, contadores, transiciones).
+     Captura: node scripts/capture.mjs templates/web/datos3d/index.html out.mp4 --fps 30 --query "scene=N&data=<ruta datos.json>" -->
+<style>
+@font-face{font-family:"Lucky";src:url("../../../node_modules/@expo-google-fonts/luckiest-guy/400Regular/LuckiestGuy_400Regular.ttf")}
+@font-face{font-family:"Baloo";font-weight:800;src:url("../../../node_modules/@expo-google-fonts/baloo-2/800ExtraBold/Baloo2_800ExtraBold.ttf")}
+@font-face{font-family:"Baloo";font-weight:600;src:url("../../../node_modules/@expo-google-fonts/baloo-2/600SemiBold/Baloo2_600SemiBold.ttf")}
+:root{--y:#ffe14d;--c:#4de1ff;--p:#ff4f9a;--o:#ff8a1f;--ink:#14121f}
+html,body{margin:0;height:100%;overflow:hidden;background:#000}
+#stage canvas{display:block}
+#ui{position:absolute;inset:0;pointer-events:none;overflow:hidden;font-family:"Baloo","Noto Color Emoji",sans-serif}
+.emo{font-family:"Noto Color Emoji",sans-serif;line-height:1}
+/* subtítulos palabra a palabra */
+#cap{position:absolute;left:5%;right:5%;bottom:9%;text-align:center;font:400 66px/1.05 "Lucky","Noto Color Emoji",sans-serif;
+  text-transform:uppercase;letter-spacing:1px;color:#fff}
+#cap span{display:inline-block;margin:0 .22em;-webkit-text-stroke:11px var(--ink);paint-order:stroke fill;
+  text-shadow:0 7px 0 rgba(0,0,0,.35)}
+#cap span.on{color:var(--y)} #cap span.k{color:var(--c)} #cap span.k.on{color:var(--p)}
+/* chip de dato + progreso */
+#badge{position:absolute;left:3.2%;top:5%;display:flex;align-items:center;gap:12px;padding:8px 22px 8px 10px;border-radius:999px;
+  background:linear-gradient(90deg,#ffe14d,#ff8a1f);box-shadow:0 8px 24px rgba(0,0,0,.35),inset 0 -4px 0 rgba(0,0,0,.15);
+  font:800 30px "Baloo",sans-serif;color:var(--ink);opacity:0}
+#badge .n{width:50px;height:50px;border-radius:50%;background:var(--ink);color:var(--y);display:grid;place-items:center;font-size:30px}
+#badge .dots{display:flex;gap:6px;margin-left:6px}#badge .dots i{width:12px;height:12px;border-radius:50%;background:rgba(20,18,31,.25)}
+#badge .dots i.f{background:var(--ink)}
+#prog{position:absolute;left:0;top:0;height:8px;width:100%;background:rgba(0,0,0,.25)}
+#prog b{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#ff4f9a,#ffe14d);border-radius:0 6px 6px 0}
+/* golpe de número (slam) */
+#slam{position:absolute;left:50%;top:44%;width:0;height:0}
+#slam .burst{position:absolute;left:-460px;top:-460px;width:920px;height:920px;border-radius:50%;
+  background:repeating-conic-gradient(from 0deg,rgba(255,225,77,.95) 0deg 9deg,rgba(255,138,31,.95) 9deg 18deg);
+  -webkit-mask:radial-gradient(circle,#000 30%,transparent 70%);mask:radial-gradient(circle,#000 30%,transparent 70%)}
+#slam .big{position:absolute;left:-400px;width:800px;top:-150px;text-align:center;font:400 230px/1 "Lucky",sans-serif;color:#fff;
+  -webkit-text-stroke:16px var(--ink);paint-order:stroke fill;text-shadow:0 14px 0 rgba(0,0,0,.4)}
+#slam .sub{position:absolute;left:-500px;width:1000px;top:85px;text-align:center;font:400 64px/1 "Lucky",sans-serif;color:var(--y);
+  -webkit-text-stroke:10px var(--ink);paint-order:stroke fill}
+/* stickers, contadores y tarjetas */
+.stk{position:absolute;left:0;top:0;will-change:transform;transform-origin:50% 50%;white-space:nowrap}
+.stamp{font:400 74px/1 "Lucky",sans-serif;color:#fff;padding:10px 26px 2px;border-radius:22px;-webkit-text-stroke:3px var(--ink);
+  paint-order:stroke fill;box-shadow:0 10px 0 rgba(0,0,0,.25),0 0 0 7px #fff inset}
+.card{position:absolute;padding:14px 26px;border-radius:26px;background:rgba(255,255,255,.94);color:var(--ink);
+  box-shadow:0 14px 34px rgba(0,0,0,.35);font:800 40px/1.1 "Baloo","Noto Color Emoji",sans-serif}
+.card small{display:block;font:600 24px "Baloo",sans-serif;opacity:.7}
+.count{font:400 120px/1 "Lucky",sans-serif;color:#fff;-webkit-text-stroke:12px var(--ink);paint-order:stroke fill;
+  text-shadow:0 10px 0 rgba(0,0,0,.35)}
+.bar{height:34px;border-radius:17px;background:rgba(20,18,31,.15);overflow:hidden;margin-top:8px}
+.bar b{display:block;height:100%;border-radius:17px}
+/* transiciones */
+#stripes{position:absolute;inset:-10% -20%;}
+#stripes i{position:absolute;top:0;bottom:0;width:60%;transform:skewX(-14deg)}
+#flash{position:absolute;inset:0;background:#fff;opacity:0}
+#leak{position:absolute;inset:0;mix-blend-mode:screen;opacity:0;
+  background:radial-gradient(circle at 15% 30%,rgba(255,150,60,.9),transparent 45%),radial-gradient(circle at 85% 70%,rgba(255,60,140,.75),transparent 50%)}
+#fade{position:absolute;inset:0;background:#000;opacity:0}
+</style>
+<script type="importmap">{"imports":{"three":"../../../node_modules/three/build/three.module.js","three/addons/":"../../../node_modules/three/examples/jsm/"}}</script>
+</head><body>
+<div id="stage"></div>
+<div id="ui">
+  <div id="leak"></div>
+  <div id="layer"></div>
+  <div id="slam"><div class="burst"></div><div class="big"></div><div class="sub"></div></div>
+  <div id="badge"><div class="n">1</div><span class="t">DATO</span><div class="dots"><i></i><i></i><i></i><i></i><i></i></div></div>
+  <div id="cap"></div>
+  <div id="prog"><b></b></div>
+  <div id="stripes"><i style="background:#ff4f9a"></i><i style="background:#ffe14d"></i><i style="background:#4de1ff"></i></div>
+  <div id="flash"></div><div id="fade"></div>
+</div>
+<script type="module" src="./main.js"></script>
+</body></html>
