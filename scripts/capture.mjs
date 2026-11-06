@@ -85,7 +85,7 @@ const ff = spawn("ffmpeg", ["-y", "-loglevel", "error", "-f", "image2pipe", "-fr
   "-c:v", "libx264", "-crf", "18", "-pix_fmt", "yuv420p", "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2", outPath], { stdio: ["pipe", "inherit", "inherit"] });
 for (let i = 0; i < n; i++) {
   await page.evaluate(async (t) => { const r = window.__seek(t); if (r instanceof Promise) await r; }, (first + i) / fps);
-  const buf = await page.screenshot({ type: "png" });
+  const buf = await page.screenshot({ type: "png", timeout: 300000 });
   if (!ff.stdin.write(buf)) await new Promise((r) => ff.stdin.once("drain", r));
   if (i % 30 === 0) process.stdout.write(`frame ${i}/${n}\n`);
 }
