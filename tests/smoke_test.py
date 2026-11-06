@@ -73,6 +73,34 @@ def main():
     for name, p, extra in prompts:
         d = OUT / f"make_{name.split()[0]}"
         run(f"make: {name}", PY + ["make", p, "--quality", "preview", "-o", str(d)] + extra, [d / "final.mp4", d / "storyboard.jpg"])
+    # modo híbrido (sin gastar créditos): arte "ilustrado" simulado con el propio motor
+    sys.path.insert(0, str(ROOT))
+    from PIL import Image as _I
+    from studio.characters import make_character, render_character
+    from studio.motion import pose_for
+    hy = OUT / "hibrido"
+    hy.mkdir(parents=True, exist_ok=True)
+    _c = make_character("gato", "Tito")
+    for name, vis in (("base", "X"), ("boca_cand", "A")):
+        _p = pose_for("idle", 0.0, "happy")
+        _p.viseme = vis
+        im, _ = render_character(_c, _p, 600)
+        bg = _I.new("RGBA", (im.width + 80, im.height + 80), (255, 255, 255, 255))
+        bg.alpha_composite(im, (40, 40))
+        bg.convert("RGB").save(hy / f"{name}_blanco.png")
+    run("sprite cutout", PY + ["sprite", "cutout", str(hy / "base_blanco.png"), str(hy / "boca_cand_blanco.png")],
+        [hy / "base_blanco_cut.png", hy / "boca_cand_blanco_cut.png"])
+    run("sprite patch (variante boca)", PY + ["sprite", "patch", str(hy / "base_blanco_cut.png"), str(hy / "boca_cand_blanco_cut.png"),
+                                              "-o", str(hy / "boca.png")], hy / "boca.png")
+    run("fondo para híbrido", PY + ["image", "un parque soleado", "--provider", "local", "-o", str(hy / "fondo.png")], hy / "fondo.png")
+    (hy / "hibrido.json").write_text(json.dumps(dict(
+        title="Prueba híbrida", format="16:9", fps=24, assets_dir=str(hy), show_title=False,
+        characters=[dict(id="tito", name="Tito", species="gato", sprite=dict(base="base_blanco_cut.png", talk="boca.png"))],
+        scenes=[dict(id="s1", background="park", background_image="fondo.png", duration=3, camera=dict(type="speaker"),
+                     actors=[dict(character="tito", action="walk", **{"from": [0.3, 0.92], "to": [0.6, 0.92]})],
+                     dialogue=[dict(character="tito", text="¡Hola!")])]), ensure_ascii=False), encoding="utf-8")
+    run("render híbrido (sprites + fondo ilustrado)", PY + ["render", str(hy / "hibrido.json"), "--quality", "preview", "-o", str(hy / "render")],
+        hy / "render" / "final.mp4")
     run("render desde JSON", PY + ["render", o("plan.json"), "--quality", "preview", "-o", o("render_json")], OUT / "render_json" / "final.mp4")
     run("imagen local", PY + ["image", "un gato astronauta en el espacio", "--provider", "local", "-o", o("img_local.png")], o("img_local.png"))
     run("imagen auto (IA si hay red/clave; si no, local)", PY + ["image", "un dragón tierno", "--provider", "auto", "-o", o("img_auto.png")], o("img_auto.png"))

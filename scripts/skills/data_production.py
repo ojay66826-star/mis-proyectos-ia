@@ -15,7 +15,8 @@ ROUTING = """| Petición del usuario | Skills que se combinan | Comando base |
 | «Convierte esta imagen en video» | ai-video-generation (local o Replicate) → video-editing | `img2video foto.jpg --move parallax` |
 | «Para YouTube Shorts / TikTok» | tiktok-animation / youtube-animation → short-video-animation → animation-optimization | `make "<idea>" --format 9:16` + `export --preset tiktok` |
 | «Que camine / baile / hable / se emocione» | character-animation → character-movement / character-dancing / character-lip-sync / character-emotions | `make "<personaje> <acción>"` |
-| «Para editar en CapCut» | animation-optimization | `export projects/<…>/final.mp4 --preset capcut` (+ subir el zip a Google Drive si hay conector) |
+| «Para editar en CapCut» | animation-optimization | `export projects/<…>/final.mp4 --preset capcut` (+ enviar el zip al usuario como archivo) |
+| «Más calidad / menos básico / ilustrado / realista» | animation-workflow (modo híbrido) | ElevenLabs genera arte → `sprite cutout`/`sprite patch` → `render` (ver `docs/HIBRIDO.md`) |
 | «Logo / texto / infografía animada» | animated-logos / kinetic-typography / infographic-animation | `logo`, `text`, `infographic` |
 | «Animación para web / Lottie / GSAP / Three.js» | svg/css/gsap/lottie/threejs/interactive-animation | `web <plantilla>`, `lottie` |"""
 

@@ -21,8 +21,9 @@ Genera `projects/<carpeta>/capcut/` y `projects/<carpeta>/<carpeta>_capcut.zip`:
 
 También está en la interfaz web (botón **Paquete CapCut** junto a las exportaciones).
 
-**Llevarlo al móvil:** si Claude tiene el conector de Google Drive, puede subir el zip (o el `final.mp4` exportado con
-`--preset tiktok`, etc.) a tu Drive; en el móvil lo abres desde Drive y lo importas en CapCut.
+**Llevarlo al móvil:** Claude te envía el zip como archivo adjunto en el chat (lo descargas desde la app de Claude).
+El conector de Google Drive no sirve aquí: solo acepta contenido escrito dentro de la llamada, no archivos de video o
+zip de varios MB.
 
 Limitaciones: los proyectos 3D no se re-renderizan sin texto (el video limpio conserva los textos del render). Si
 `espeak-ng` no está instalado y no hay clave de voz en la nube, las voces salen en silencio (lo avisa `doctor`).

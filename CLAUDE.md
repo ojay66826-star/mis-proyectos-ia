@@ -26,7 +26,8 @@ video, personaje, efecto, logo, texto animado o exportación, actúa como **dire
 | Web (GSAP/CSS/SVG/Lottie/Three.js) | `python -m studio web <plantilla> --query "…"` · `python -m studio lottie` |
 | Remotion (React) | `python -m studio remotion "<idea o project.json>"` |
 | Post-producción | `export --preset youtube\|youtube_shorts\|tiktok\|instagram\|web\|whatsapp\|webm\|gif\|zip`, `upscale`, `interpolate`, `loop` |
-| Editar en CapCut | `export projects/<carpeta> --preset capcut` → `capcut/` + `<carpeta>_capcut.zip` (súbelo a Google Drive con el conector si el usuario lo pide; ver `docs/CAPCUT.md`) |
+| Editar en CapCut | `export projects/<carpeta> --preset capcut` → `capcut/` + `<carpeta>_capcut.zip` (entrégalo con SendUserFile; el conector de Drive no admite archivos grandes; ver `docs/CAPCUT.md`) |
+| Modo híbrido (arte IA + motor) | ElevenLabs genera fondo/personaje/variantes → `sprite cutout` / `sprite patch` → `render` con `sprite` y `background_image` (ver `docs/HIBRIDO.md`; avisar coste en créditos antes) |
 | Interfaz gráfica | `python -m studio serve` → http://127.0.0.1:8765 |
 | Pruebas | `python tests/smoke_test.py [--slow]` · `node tests/ui_test.mjs` (con el servidor activo) |
 
