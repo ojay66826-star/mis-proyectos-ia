@@ -181,6 +181,10 @@ def cmd_remotion(a):
 
 def cmd_export(a):
     from . import exporter
+    if a.preset == "capcut":
+        from .capcut import capcut_package
+        print(json.dumps(capcut_package(a.video, a.output), indent=2, ensure_ascii=False))
+        return
     out = _out(a.output, Path(a.video).stem + f"_{a.preset}.mp4")
     if a.preset == "webm":
         print(exporter.to_webm(a.video, out.with_suffix(".webm")))
@@ -407,7 +411,7 @@ def main(argv=None):
 
     s = sub.add_parser("export", help="exportar para plataformas")
     s.add_argument("video")
-    s.add_argument("--preset", default="youtube", help="youtube, youtube_shorts, tiktok, instagram, web, whatsapp, webm, gif, zip")
+    s.add_argument("--preset", default="youtube", help="youtube, youtube_shorts, tiktok, instagram, web, whatsapp, webm, gif, zip, capcut (capcut: carpeta del proyecto o su final.mp4 → capas editables + zip)")
     s.add_argument("-o", "--output")
     s.set_defaults(fn=cmd_export)
 

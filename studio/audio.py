@@ -403,7 +403,7 @@ LOOPING = {"fire", "rain", "wind", "energy"}
 
 
 def mix_timeline(duration: float, clips: list[dict], music: np.ndarray | None = None, music_gain=0.45,
-                 duck: bool = True) -> np.ndarray:
+                 duck: bool = True, normalize: bool = True) -> np.ndarray:
     """clips: [{audio: ndarray(mono/estéreo), start, gain, pan, kind}]"""
     buf = np.zeros((int(duration * SR) + 1, 2), dtype=np.float32)
     voice_env = np.zeros(len(buf), dtype=np.float32)
@@ -426,5 +426,7 @@ def mix_timeline(duration: float, clips: list[dict], music: np.ndarray | None = 
             env = smooth(voice_env, int(0.25 * SR))
             mus = mus * (1 - 0.55 * env)[:, None]
         buf += mus * music_gain
+    if not normalize:
+        return buf
     peak = np.max(np.abs(buf)) or 1
     return buf / max(1.0, peak / 0.95)

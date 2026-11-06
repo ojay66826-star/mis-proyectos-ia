@@ -329,10 +329,10 @@ def render_frames_to_video(spec, path, quality="hd", cb=None, workers=None):
 
 
 # ---------------------------------------------------------------- audio
-def build_audio(spec, out: Path, cb=None) -> Path:
+def audio_clips(spec):
+    """Clips de voz y efectos de la línea de tiempo + música (sin mezclar)."""
     total = spec["total_duration"]
     clips = []
-    fps = spec["fps"]
     for s in spec["scenes"]:
         st = s["start"]
         for d in s["dialogue"]:
@@ -379,6 +379,12 @@ def build_audio(spec, out: Path, cb=None) -> Path:
         if s is not spec["scenes"][0] and spec["transition_duration"]:
             clips.append(dict(audio=A.synth_sfx("whoosh"), start=st, gain=0.35))
     music = A.synth_music(spec.get("mood", "happy"), total + 0.5, seed=spec["title"]) if spec.get("music", True) else None
+    return clips, music
+
+
+def build_audio(spec, out: Path, cb=None) -> Path:
+    total = spec["total_duration"]
+    clips, music = audio_clips(spec)
     _log(cb, "audio", 0.8, "mezclando voces, efectos y música")
     mix = A.mix_timeline(total, clips, music, music_gain=spec.get("music_gain", 0.4))
     path = out / "audio" / "mezcla.wav"

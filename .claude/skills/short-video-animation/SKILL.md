@@ -50,7 +50,7 @@ Reel de 12 s: gancho con salto (jump) en el segundo 0, baile con confeti, remate
 |---|---|---|
 | Motor 2D (9:16) | render vertical | ✅ motor propio del estudio |
 | exporter presets | tiktok/shorts/instagram | ✅ motor propio del estudio |
-| CapCut | ajustes finales manuales | 💻 programa externo recomendado |
+| CapCut | ajustes finales manuales (`export --preset capcut` prepara las capas) | 💻 programa externo recomendado |
 
 ## Control de calidad
 

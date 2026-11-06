@@ -153,7 +153,7 @@ function qcHtml(qc) {
 }
 function exportButtons(videoUrl) {
   const ops = [["export:youtube", "YouTube 1080p"], ["export:tiktok", "TikTok/Reels"], ["export:instagram", "Instagram"], ["export:web", "Web ligero"],
-    ["export:whatsapp", "WhatsApp"], ["upscale:", "Upscale ×2"], ["interpolate:", "60 fps"], ["loop:", "Bucle perfecto"]];
+    ["export:whatsapp", "WhatsApp"], ["export:capcut", "Paquete CapCut"], ["upscale:", "Upscale ×2"], ["interpolate:", "60 fps"], ["loop:", "Bucle perfecto"]];
   return `<div class="files">` + ops.map(([k, l]) => `<button class="btn ghost exp" data-k="${k}" data-v="${videoUrl}">${l}</button>`).join("") + `</div><div class="expOut"></div>`;
 }
 function bindExports(root) {

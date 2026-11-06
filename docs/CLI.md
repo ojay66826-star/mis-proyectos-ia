@@ -318,7 +318,8 @@ positional arguments:
 options:
   -h, --help           show this help message and exit
   --preset PRESET      youtube, youtube_shorts, tiktok, instagram, web,
-                       whatsapp, webm, gif, zip
+                       whatsapp, webm, gif, zip, capcut (capcut: carpeta del
+                       proyecto o su final.mp4 → capas editables + zip)
   -o, --output OUTPUT
 ```
 
