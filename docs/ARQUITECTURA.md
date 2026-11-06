@@ -30,6 +30,7 @@ Rutas alternativas que comparten el mismo audio, estilos y exportación:
 - `templates/web/*.html` + `scripts/capture.mjs` — GSAP/CSS/SVG/Lottie/Three.js capturados frame a frame.
 - `remotion_bridge.py` + `remotion/` — composición React a partir del proyecto.
 - `exporter.py` — presets de plataforma, WebM, GIF, upscale, interpolación, bucles, concat con xfade, ZIP.
+- `capcut.py` — paquete para CapCut (`export --preset capcut`): video limpio, pistas de audio separadas, SRT, personajes PNG. Ver `docs/CAPCUT.md`.
 
 ## project.json (esquema)
 

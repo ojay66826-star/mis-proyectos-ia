@@ -91,6 +91,9 @@ def main():
     for preset in ("tiktok", "whatsapp", "webm", "gif"):
         ext = {"webm": ".webm", "gif": ".gif"}.get(preset, ".mp4")
         run(f"export {preset}", PY + ["export", str(src), "--preset", preset, "-o", o(f"exp_{preset}.mp4")], o(f"exp_{preset}{ext}") if ext != ".mp4" else o(f"exp_{preset}.mp4"))
+    run("export capcut (capas editables)", PY + ["export", str(src), "--preset", "capcut", "-o", o("capcut")],
+        [OUT / "capcut" / "video" / "video_limpio.mp4", OUT / "capcut" / "audio" / "mezcla.wav", OUT / "capcut" / "subtitulos.srt",
+         OUT / "capcut" / "LEEME.txt"])
     run("upscale x2", PY + ["upscale", o("texto.mp4"), "--factor", "2", "-o", o("upscale.mp4")], o("upscale.mp4"))
     run("interpolar 48fps", PY + ["interpolate", o("bg_blobs.mp4"), "--fps", "48", "-o", o("interp.mp4")], o("interp.mp4"))
     run("bucle perfecto", PY + ["loop", o("bg_blobs.mp4"), "-o", o("loop.mp4")], o("loop.mp4"))

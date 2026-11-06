@@ -240,6 +240,9 @@ def api_export(body: dict):
     out.mkdir(exist_ok=True)
     cmd = body.get("op", "export")
     target = out / f"{video.stem}_{preset if cmd == 'export' else cmd}.mp4"
+    if cmd == "export" and preset == "capcut":
+        args = ["export", str(video), "--preset", "capcut"]
+        return start_job(cmd, args, video.parent, ["*_capcut.zip"])
     if cmd == "export":
         args = ["export", str(video), "--preset", preset, "-o", str(target)]
     elif cmd == "upscale":
