@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Ruta animada en mapa</title>
+<!--
+  Ruta animada sobre mapa real (Natural Earth 1:50m vía world-atlas, dominio público).
+  Captura: python -m studio web ruta-mapa --width 1080 --height 1920 -o projects/ruta/ruta.mp4
+  Parámetros (query): a=Madrid&alat=40.4168&alon=-3.7038&b=París&blat=48.8566&blon=2.3522
+  Cobertura del mapa: lon -14..18, lat 34..58 (Europa occidental).
+-->
+<style>
+  :root { --mar:#061024; --tierra:#243756; --borde:#4b6590; --destaca:#3d5f93; --ruta1:#ff6b6b; --ruta2:#ffd166; --txt:#f4f1ea; }
+  html,body { margin:0; height:100%; background:var(--mar); overflow:hidden; font-family:"DejaVu Sans","Helvetica Neue",Arial,sans-serif; }
+  #stage { position:absolute; inset:0; }
+  svg { width:100%; height:100%; display:block; }
+  .pais { fill:var(--tierra); stroke:var(--borde); stroke-width:1.2; vector-effect:non-scaling-stroke; }
+  .pais.on { fill:var(--destaca); stroke:#7f9cc9; }
+  .grat { fill:none; stroke:#7fa6e0; stroke-opacity:.10; stroke-width:1; vector-effect:non-scaling-stroke; }
+  .ciudad { fill:#9fb3d1; }
+  .ciudad-t { fill:#9fb3d1; font-weight:600; letter-spacing:.02em; }
+  .hud { position:absolute; left:0; right:0; color:var(--txt); text-align:center; pointer-events:none; }
+  #top { top:7%; }
+  #top .k { font-size:34px; letter-spacing:.35em; opacity:.75; text-transform:uppercase; }
+  #top .t { font-size:96px; font-weight:800; line-height:1.05; margin-top:12px; text-shadow:0 6px 30px rgba(0,0,0,.5); }
+  #bot { bottom:8%; }
+  .card { display:inline-flex; gap:56px; padding:30px 54px; border-radius:36px; background:rgba(8,18,38,.72);
+          border:2px solid rgba(255,255,255,.12); backdrop-filter:blur(6px); }
+  .card div { text-align:center; }
+  .card b { display:block; font-size:72px; font-weight:800; font-variant-numeric:tabular-nums; }
+  .card span { font-size:28px; opacity:.7; letter-spacing:.15em; text-transform:uppercase; }
+  #final { position:absolute; left:0; right:0; bottom:7%; text-align:center; color:var(--txt); opacity:0; }
+  #final .box { display:inline-block; padding:40px 60px; border-radius:40px; background:rgba(6,14,32,.78); border:2px solid rgba(255,209,102,.35); }
+  #final .t { font-size:96px; font-weight:800; text-shadow:0 8px 40px rgba(0,0,0,.6); }
+  #final .s { font-size:40px; opacity:.85; margin-top:18px; letter-spacing:.08em; }
+  #vig { position:absolute; inset:0; pointer-events:none;
+         background:radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,.55) 100%); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg id="map" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="gr" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ff6b6b"/><stop offset="1" stop-color="#ffd166"/></linearGradient>
+      <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <radialGradient id="mar" cx="50%" cy="45%" r="75%"><stop offset="0" stop-color="#0d2142"/><stop offset="1" stop-color="#040b1a"/></radialGradient>
+    </defs>
+    <rect id="sea" fill="url(#mar)"/>
+    <g id="grat"></g>
+    <g id="land"></g>
+    <g id="cities"></g>
+    <path id="future" fill="none" stroke="#ffffff" stroke-opacity=".28" stroke-dasharray="6 10" stroke-linecap="round"/>
+    <path id="trail" fill="none" stroke="url(#gr)" stroke-linecap="round" filter="url(#glow)"/>
+    <g id="pins"></g>
+    <g id="plane"><path fill="#ffffff" filter="url(#glow)"
+      d="M22 0 L6 -3 L-4 -16 L-9 -16 L-4 -3 L-14 -2 L-18 -8 L-21 -8 L-19 0 L-21 8 L-18 8 L-14 2 L-4 3 L-9 16 L-4 16 L6 3 Z"/></g>
+  </svg>
+  <div id="vig"></div>
+  <div class="hud" id="top"><div class="k" id="kick">Ruta</div><div class="t" id="ttl"></div></div>
+  <div class="hud" id="bot"><div class="card">
+    <div><b id="km">0</b><span>km</span></div>
+    <div><b id="hr">0:00</b><span>vuelo</span></div>
+  </div></div>
+  <div id="final"><div class="box"><div class="t" id="ft"></div><div class="s" id="fs"></div></div></div>
+</div>
+<script>
+(async () => {
+  const Q = new URLSearchParams(location.search);
+  const A = { n: Q.get("a") || "Madrid", lat: +(Q.get("alat") || 40.4168), lon: +(Q.get("alon") || -3.7038) };
+  const Bc = { n: Q.get("b") || "París", lat: +(Q.get("blat") || 48.8566), lon: +(Q.get("blon") || 2.3522) };
+  const K = 100, R = Math.PI / 180;
+  const P = (lon, lat) => [lon * K, -Math.log(Math.tan(Math.PI / 4 + lat * R / 2)) / R * K];
+  const svg = document.getElementById("map"), NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent && parent.appendChild(e); return e; };
+
+  const data = await (await fetch("data/europa.json")).json();
+  const land = document.getElementById("land");
+  const on = new Set(Q.get("destaca") ? Q.get("destaca").split(",") : ["Spain", "France"]);
+  for (const c of data) el("path", { d: c.d, class: "pais" + (on.has(c.n) ? " on" : "") }, land);
+  const grat = document.getElementById("grat");
+  for (let lon = -14; lon <= 18; lon += 2) { const [x1, y1] = P(lon, 34), [x2, y2] = P(lon, 58); el("path", { d: `M${x1} ${y1}L${x2} ${y2}`, class: "grat" }, grat); }
+  for (let lat = 34; lat <= 58; lat += 2) { const [x1, y1] = P(-14, lat), [x2, y2] = P(18, lat); el("path", { d: `M${x1} ${y1}L${x2} ${y2}`, class: "grat" }, grat); }
+  const [sx0, sy0] = P(-20, 62), [sx1, sy1] = P(24, 30);
+  Object.entries({ x: sx0, y: sy0, width: sx1 - sx0, height: sy1 - sy0 }).forEach(([k, v]) => document.getElementById("sea").setAttribute(k, v));
+
+  // Ciudades de contexto (tenues)
+  const extra = [["Lisboa", -9.14, 38.72], ["Barcelona", 2.17, 41.39], ["Valencia", -0.38, 39.47], ["Bilbao", -2.93, 43.26],
+    ["Burdeos", -0.58, 44.84], ["Toulouse", 1.44, 43.60], ["Lyon", 4.84, 45.76], ["Londres", -0.13, 51.51], ["Bruselas", 4.35, 50.85],
+    ["Sevilla", -5.98, 37.39], ["Marsella", 5.37, 43.30], ["Nantes", -1.55, 47.22]]
+    .filter(c => c[0] !== A.n && c[0] !== Bc.n);
+  const cg = document.getElementById("cities"), cityTxt = [];
+  for (const [n, lo, la] of extra) {
+    const [x, y] = P(lo, la);
+    const g = el("g", { transform: `translate(${x} ${y})` }, cg);
+    const dot = el("circle", { r: 3, class: "ciudad" }, g);
+    const t = el("text", { x: 8, y: 4, class: "ciudad-t" }, g); t.textContent = n;
+    cityTxt.push({ dot, t });
+  }
+
+  // Ruta curva (bezier cuadrática con arco hacia el oeste)
+  const a = P(A.lon, A.lat), b = P(Bc.lon, Bc.lat);
+  const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy);
+  const bend = 0.22 * L, nx = -dy / L, ny = dx / L;
+  const c = [mx + nx * bend * Math.sign(nx || 1) * -1, my + ny * bend * Math.sign(nx || 1) * -1];
+  const d = `M${a[0]} ${a[1]} Q${c[0]} ${c[1]} ${b[0]} ${b[1]}`;
+  const trail = document.getElementById("trail"), future = document.getElementById("future");
+  trail.setAttribute("d", d); future.setAttribute("d", d);
+  const len = trail.getTotalLength();
+  trail.setAttribute("stroke-dasharray", `${len} ${len}`);
+  const gr = document.getElementById("gr");
+  gr.setAttribute("x1", a[0]); gr.setAttribute("y1", a[1]); gr.setAttribute("x2", b[0]); gr.setAttribute("y2", b[1]);
+
+  // Pines
+  const pins = document.getElementById("pins");
+  const mkPin = (p, name, col) => {
+    const g = el("g", { transform: `translate(${p[0]} ${p[1]})` }, pins);
+    const ring = el("circle", { r: 10, fill: "none", stroke: col, "stroke-width": 3 }, g);
+    const head = el("g", {}, g);
+    el("path", { d: "M0 0 C-4 -10 -14 -16 -14 -28 A14 14 0 1 1 14 -28 C14 -16 4 -10 0 0Z", fill: col, filter: "url(#glow)" }, head);
+    el("circle", { cx: 0, cy: -28, r: 5.5, fill: "#0b1a33" }, head);
+    const lab = el("text", { x: 0, y: 34, "text-anchor": "middle", fill: "#f4f1ea", "font-weight": 800, "paint-order": "stroke", stroke: "#081428", "stroke-width": 6 }, g);
+    lab.textContent = name;
+    return { ring, head, lab };
+  };
+  const pA = mkPin(a, A.n, "#ff6b6b"), pB = mkPin(b, Bc.n, "#ffd166");
+
+  // Distancia real (haversine) y tiempo de vuelo aproximado
+  const hv = (p, q) => { const s = Math.sin((q.lat - p.lat) * R / 2) ** 2 + Math.cos(p.lat * R) * Math.cos(q.lat * R) * Math.sin((q.lon - p.lon) * R / 2) ** 2; return 12742 * Math.asin(Math.sqrt(s)); };
+  const KM = hv(A, Bc), MIN = Math.round(KM / 780 * 60 + 30);
+  const fmt = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  const hhmm = (m) => `${Math.floor(m / 60)}:${String(Math.round(m % 60)).padStart(2, "0")}`;
+  document.getElementById("ttl").textContent = `${A.n} → ${Bc.n}`;
+  document.getElementById("ft").textContent = `${A.n} → ${Bc.n}`;
+  document.getElementById("fs").textContent = `${fmt(KM)} km · ≈ ${Math.floor(MIN / 60)} h ${String(MIN % 60).padStart(2, "0")} min de vuelo`;
+
+  // Utilidades de tiempo
+  const T = Number(Q.get("dur") || 12);
+  const cl = (x) => Math.max(0, Math.min(1, x));
+  const seg = (t, t0, t1) => cl((t - t0) / (t1 - t0));
+  const io = (x) => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  const oBack = (x) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+  const lerp = (p, q, k) => p + (q - p) * k;
+  const W = innerWidth, H = innerHeight, AR = W / H;
+  const t0Fly = 1.6, t1Fly = 8.2;
+
+  const plane = document.getElementById("plane");
+  const top = document.getElementById("top"), bot = document.getElementById("bot"), fin = document.getElementById("final");
+  const kmEl = document.getElementById("km"), hrEl = document.getElementById("hr");
+
+  function pinState(pin, k, pulse) {
+    const s = oBack(k);
+    pin.head.setAttribute("transform", `translate(0 ${(-1 + k) * 60}) scale(${Math.max(0.001, s)})`);
+    pin.head.setAttribute("opacity", k > 0 ? 1 : 0);
+    pin.lab.setAttribute("opacity", cl(k * 2 - 1));
+    const r = 10 + pulse * 70;
+    pin.ring.setAttribute("r", r); pin.ring.setAttribute("opacity", pulse > 0 && pulse < 1 ? (1 - pulse) : 0);
+  }
+
+  function frame(t) {
+    const fk = io(seg(t, t0Fly, t1Fly));
+    const pt = trail.getPointAtLength(len * fk), pn = trail.getPointAtLength(Math.min(len, len * fk + 1));
+    const pp = fk >= 1 ? trail.getPointAtLength(len - 1) : pt;
+    const ang = Math.atan2(pn.y - pp.y, pn.x - pp.x) * 180 / Math.PI;
+
+    // Cámara: cerca de A → sigue al avión → abre para ver toda la ruta
+    const close = 620, follow = 780;
+    const qx = (a[0] + 2 * c[0] + b[0]) / 4, qy = (a[1] + 2 * c[1] + b[1]) / 4;
+    const bx0 = Math.min(a[0], b[0], qx), bx1 = Math.max(a[0], b[0], qx);
+    const all = Math.max(bx1 - bx0 + 360, (Math.abs(dy) + 620) * AR / 0.72);
+    let cx, cy, vw;
+    const zIn = io(seg(t, 0, 1.6));
+    if (t < t0Fly) { cx = a[0]; cy = a[1] - 40; vw = lerp(1300, close, zIn); }
+    else if (t < t1Fly + 0.6) {
+      const k = seg(t, t0Fly, t0Fly + 1.2);
+      cx = lerp(a[0], pt.x, io(k)); cy = lerp(a[1] - 40, pt.y - 40, io(k)); vw = lerp(close, follow, io(k));
+      if (t > t1Fly - 0.8) { const e = io(seg(t, t1Fly - 0.8, t1Fly + 0.6)); vw = lerp(follow, close, e); cx = lerp(cx, b[0], e); cy = lerp(cy, b[1] - 40, e); }
+    } else {
+      const e = io(seg(t, t1Fly + 1.6, t1Fly + 3.2));
+      cx = lerp(b[0], (bx0 + bx1) / 2, e);
+      cy = lerp(b[1] - 40, my + 0.16 * all / AR, e); vw = lerp(close, all, e);
+    }
+    const vh = vw / AR;
+    svg.setAttribute("viewBox", `${cx - vw / 2} ${cy - vh / 2} ${vw} ${vh}`);
+    const u = vw / W; // unidades de mapa por píxel de pantalla
+
+    // Tamaños constantes en pantalla
+    trail.setAttribute("stroke-width", 9 * u); future.setAttribute("stroke-width", 5 * u);
+    future.setAttribute("stroke-dasharray", `${14 * u} ${18 * u}`);
+    trail.setAttribute("stroke-dashoffset", len * (1 - fk));
+    for (const ct of cityTxt) { ct.dot.setAttribute("r", 6 * u); ct.t.setAttribute("font-size", 30 * u); ct.t.setAttribute("x", 14 * u); ct.t.setAttribute("y", 10 * u); }
+    const ps = 2.4 * u;
+    pA.head.parentNode.setAttribute("transform", `translate(${a[0]} ${a[1]}) scale(${ps})`);
+    pB.head.parentNode.setAttribute("transform", `translate(${b[0]} ${b[1]}) scale(${ps})`);
+    for (const p of [pA, pB]) { p.lab.setAttribute("font-size", 22); p.lab.setAttribute("y", 30); p.lab.setAttribute("stroke-width", 4); p.ring.setAttribute("stroke-width", 1.6); }
+    pinState(pA, seg(t, 0.2, 0.9), seg(t, 0.8, 1.9));
+    pinState(pB, seg(t, t1Fly - 0.1, t1Fly + 0.6), seg(t, t1Fly + 0.5, t1Fly + 1.6));
+
+    // Avión: despega (crece), vuela, aterriza (encoge)
+    const sIn = io(seg(t, t0Fly - 0.3, t0Fly + 0.5)), sOut = 1 - io(seg(t, t1Fly - 0.5, t1Fly + 0.1));
+    const pl = 2.6 * u * (0.4 + 0.6 * Math.min(sIn, sOut)) * (1 + 0.25 * Math.sin(Math.PI * fk));
+    plane.setAttribute("transform", `translate(${pt.x} ${pt.y}) rotate(${ang}) scale(${pl})`);
+    plane.setAttribute("opacity", Math.min(sIn, Math.max(sOut, 0)) > 0.02 ? Math.min(1, sIn * 1.5, sOut * 1.5) : 0);
+
+    // HUD
+    const hudIn = io(seg(t, 0.3, 1.2)), hudOut = 1 - io(seg(t, t1Fly + 1.4, t1Fly + 2.2));
+    top.style.opacity = hudIn * hudOut; top.style.transform = `translateY(${(1 - hudIn) * -40}px)`;
+    bot.style.opacity = hudIn * hudOut; bot.style.transform = `translateY(${(1 - hudIn) * 40}px)`;
+    kmEl.textContent = fmt(KM * fk); hrEl.textContent = hhmm(MIN * fk);
+    const fIn = io(seg(t, t1Fly + 2.6, t1Fly + 3.4));
+    fin.style.opacity = fIn; fin.style.transform = `translateY(${(1 - fIn) * 50}px) scale(${0.92 + 0.08 * fIn})`;
+    document.getElementById("kick").textContent = t < t1Fly ? "Rumbo a" : "Llegada";
+    document.getElementById("ttl").textContent = t < t1Fly ? Bc.n : Bc.n + " ✓";
+  }
+
+  window.__duration = T;
+  window.__seek = frame;
+  frame(0);
+  window.__ready = true;
+  if (!Q.has("capture")) { const s = performance.now(); const loop = (n) => { frame(((n - s) / 1000) % T); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
+})();
+</script>
+</body>
+</html>

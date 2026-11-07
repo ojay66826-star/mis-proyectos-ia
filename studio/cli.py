@@ -199,8 +199,10 @@ def cmd_sprite(a):
 def cmd_assemble(a):
     from .assemble import assemble
     out = _out(a.output, "montaje.mp4")
+    W, H = {"16:9": (1920, 1080), "9:16": (1080, 1920), "1:1": (1080, 1080), "4:5": (1080, 1350)}[a.format]
     res = assemble(a.clips, out, title=a.title, subtitle=a.subtitle, end_text=a.end, music=None if a.music == "none" else a.music,
-                   music_gain=a.music_gain, fade_into=[int(x) for x in a.fade_into.split(",") if x] if a.fade_into else [])
+                   music_gain=a.music_gain, fade_into=[int(x) for x in a.fade_into.split(",") if x] if a.fade_into else [],
+                   width=W, height=H, fps=a.fps)
     print(json.dumps(res, indent=2, ensure_ascii=False))
 
 
@@ -448,6 +450,8 @@ def main(argv=None):
     s.add_argument("--music", default="happy", help="estado de ánimo de la música procedural o 'none'")
     s.add_argument("--music-gain", type=float, default=0.18)
     s.add_argument("--fade-into", default="", help="números de plano a los que se entra con fundido, p. ej. 9")
+    s.add_argument("--format", default="16:9", choices=["16:9", "9:16", "1:1", "4:5"], help="formato de salida (9:16 para Shorts/TikTok/Reels)")
+    s.add_argument("--fps", type=int, default=24)
     s.add_argument("-o", "--output")
     s.set_defaults(fn=cmd_assemble)
 
