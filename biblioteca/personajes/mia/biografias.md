@@ -1,4 +1,4 @@
-# Biografías de Freya Lind 💗
+# Biografías de Mia Collins 💗
 
 > Recuerda: **OnlyFans no acepta modelos 100 % IA** (solo IA del propio creador verificado). La biografía de
 > «OnlyFans» sirve igual para **Fanvue**, que sí las permite. Pon siempre que es IA: la mayoría de redes lo exigen.
@@ -7,11 +7,11 @@
 
 ## OnlyFans / Fanvue (plataforma de suscripción)
 
-**Nombre visible:** Freya Lind 💗
-**Usuario:** @freyalind
+**Nombre visible:** Mia Collins 💗
+**Usuario:** @miacollins
 
 ```
-Hej, amor 💗 Soy Freya, tu entrenadora sueca favorita… pero aquí no vengo a hacerte sudar 😏
+Hej, amor 💗 Soy Mia, tu entrenadora sueca favorita… pero aquí no vengo a hacerte sudar 😏
 
 🏋️‍♀️ Fuerte en el gym, 🌸 suave en casa
 🇸🇪 De un pueblito nevado de Suecia → ☀️ Miami
@@ -38,8 +38,8 @@ Te dejé una sorpresa en el chat 🎁 puss puss 💋
 
 ## Instagram
 
-**Nombre:** Freya Lind 💗 | Fitness & Cozy
-**Usuario:** @freya.lind
+**Nombre:** Mia Collins 💗 | Fitness & Cozy
+**Usuario:** @mia.collins
 
 ```
 🇸🇪 Swedish girl in Miami ☀️ | AI creator 🤖
@@ -56,8 +56,8 @@ directos a sitios para adultos.)*
 
 ## TikTok
 
-**Nombre:** Freya 💗 gym & cozy
-**Usuario:** @freyalind
+**Nombre:** Mia 💗 gym & cozy
+**Usuario:** @miacollins
 
 ```
 Sueca en Miami ☀️ 🤖 AI creator
@@ -71,8 +71,8 @@ llevar gente a Instagram. Activa la etiqueta «Contenido generado por IA».)*
 
 ## X (Twitter)
 
-**Nombre:** Freya Lind 💗
-**Usuario:** @freyalind_
+**Nombre:** Mia Collins 💗
+**Usuario:** @miacollins_
 
 ```
 Swedish 🇸🇪 · Miami ☀️ · personal trainer 🏋️‍♀️

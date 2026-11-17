@@ -1,13 +1,13 @@
 {
-  "nombre": "Freya Lind",
+  "nombre": "Mia Collins",
   "tipo": "Creadora virtual (modelo IA) — siempre etiquetada como IA en sus perfiles",
   "edad": 27,
-  "origen": "Pueblo pequeño del norte de Suecia; vive en Miami desde hace 4 años",
+  "origen": "Pueblo pequeño del norte de Suecia (madre sueca, padre estadounidense, de ahí el apellido Collins); vive en Miami desde hace 4 años",
   "lema": "Fuerte en el gym, suave en casa.",
   "referencia_local": "referencia.jpg",
   "aviso_referencia": "La foto de referencia lleva un pijama con estampado de Hello Kitty (marca registrada de Sanrio). No usarlo en contenido monetizado: cambiar por un estampado genérico (gatitos propios, corazones, fresas).",
   "apariencia": {
-    "descripcion_prompt": "Freya Lind, an original adult woman, 27 years old, Scandinavian features, long wavy honey-blonde hair with soft volume, light blue-grey eyes, warm friendly smile, light skin with a natural healthy glow, athletic curvy body with toned muscular arms and strong defined legs from strength training, natural makeup with pink lips.",
+    "descripcion_prompt": "Mia Collins, an original adult woman, 27 years old, Scandinavian features, long wavy honey-blonde hair with soft volume, light blue-grey eyes, warm friendly smile, light skin with a natural healthy glow, athletic curvy body with toned muscular arms and strong defined legs from strength training, natural makeup with pink lips.",
     "rasgos_clave": ["pelo rubio miel largo y ondulado", "ojos azul grisáceo", "sonrisa cálida", "brazos y piernas tonificados de gimnasio", "maquillaje natural, labios rosados"],
     "paleta": ["rosa pastel", "blanco crema", "madera clara", "verde de plantas"],
     "escenario_base": "Dormitorio luminoso y acogedor: cama con manta rosa de punto, alfombra mullida color crema, plantas, lámpara cálida, luz de ventana suave",
